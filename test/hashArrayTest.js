@@ -1,0 +1,221 @@
+var assert = require('assert'),
+	HashArray = require('../src/HashArray'),
+	i = 0;
+
+describe('HashArray', function() {
+	describe('new HashArray(keys) should work', function() {
+		var ha = new HashArray(['key']);
+
+		it('Should have a all.length of 0.', function() {
+			assert.equal(ha.all.length, 0);
+		});
+
+		it('Should have a map with no keys.', function() {
+			for (var key in ha.map)
+				assert.equal(true, false);
+		});
+	});
+
+	describe('add(items) should work with 1 item', function() {
+		var ha = new HashArray(['key']);
+		var item = {
+			key: 'whatever'
+		};
+		ha.add(item);
+
+		it('Should have a single item.', function() {
+			assert.equal(ha.all.length, 1);
+		});
+
+		it('Should map "whatever" to that item.', function() {
+			assert.equal(ha.get('whatever'), item);
+		});
+	});
+
+	describe('add(items) should work with 1 item and multiple keys and key depths.', function() {
+		var ha = new HashArray([
+			'key', ['child', 'key'],
+			['child', 'key2']
+		]);
+		var item = {
+			key: 'whatever',
+			child: {
+				key: 'deeeep',
+				key2: 'sup'
+			}
+		};
+
+		ha.add(item);
+
+		it('Should map "deeeep" to that item.', function() {
+			assert.equal(ha.get('deeeep'), item);
+		});
+
+		it('Should have the item be the same for all key lookups', function() {
+			assert.equal(ha.get('deeeep'), ha.get('sup'));
+			assert.equal(ha.get('sup'), ha.get('whatever'));
+		});
+	});
+
+	describe('add(items) should work with > 1 item', function() {
+		var ha = new HashArray(['key']);
+		var item1 = {
+				key: 'whatever'
+			},
+			item2 = {
+				key: 'whatever2'
+			},
+			item3 = {
+				key: 'whatever3'
+			};
+
+		ha.add(item1, item2, item3);
+
+		it('Should have 3 items', function() {
+			assert.equal(ha.all.length, 3);
+		});
+
+		it('Should map "whatever" to item1', function() {
+			assert.equal(ha.get('whatever'), item1);
+		});
+
+		it('Should map "whatever2" to item2', function() {
+			assert.equal(ha.get('whatever2'), item2);
+		});
+
+		it('Should map "whatever3" to item3', function() {
+			assert.equal(ha.get('whatever3'), item3);
+		});
+	});
+
+	describe('removeByKey(keys) should work with 1 item', function() {
+		var ha = new HashArray(['key']);
+		var item = {
+			key: 'whatever'
+		};
+		ha.add(item);
+		ha.removeByKey('whatever');
+
+		it('Should have no items after remove by key', function() {
+			assert.equal(ha.all.length, 0);
+		});
+
+		it('Should have a map with no keys.', function() {
+			for (var key in ha.map)
+				assert.equal(key, undefined);
+		});
+	});
+
+	describe('removeByKey(keys) should work with 1 item and multiple key depths', function() {
+		var ha = new HashArray([
+			['child', 'key'],
+			['child', 'key2'],
+			'key'
+		]);
+
+		var item = {
+			key: 'whatever',
+			child: {
+				key: 'deeeeep',
+				key2: 'foobang'
+			}
+		};
+
+		ha.add(item);
+
+		ha.removeByKey('deeeeep');
+
+		it('Should have no items after remove by key', function() {
+			assert.equal(ha.all.length, 0);
+		});
+
+		it('Should have a map with no keys.', function() {
+			for (var key in ha.map)
+				assert.equal(key, undefined);
+		});
+	});
+
+	describe('removeByKey(keys) should work with 3 items', function() {
+		var ha = new HashArray(['key']);
+		var item1 = {
+				key: 'whatever'
+			},
+			item2 = {
+				key: 'whatever2'
+			},
+			item3 = {
+				key: 'whatever3'
+			};
+
+		ha.add(item1, item2, item3);
+		ha.removeByKey('whatever');
+
+		it('Should have 2 items after remove by key', function() {
+			assert.equal(ha.all.length, 2);
+		});
+
+		it('Should have no key for removed item (has)', function() {
+			assert.equal(ha.has('whatever'), false);
+		});
+
+		it('Should have no key for removed item (get)', function() {
+			assert.equal(ha.get('whatever'), undefined);
+		});
+
+		it('Should have remaining two items by key', function() {
+			assert.equal(ha.get('whatever2'), item2);
+			assert.equal(ha.get('whatever3'), item3);
+		});
+	});
+
+	describe('remove(items) should work with 1 item', function() {
+		var ha = new HashArray(['key']);
+		var item = {
+			key: 'whatever'
+		};
+		ha.add(item);
+		ha.remove(item);
+
+		it('Should have no items after remove', function() {
+			assert.equal(ha.all.length, 0);
+		});
+
+		it('Should have a map with no keys.', function() {
+			for (var key in ha.map)
+				assert.equal(key, undefined);
+		});
+	});
+
+	describe('remove(items) should work with 3 items', function() {
+		var ha = new HashArray(['key']);
+		var item1 = {
+				key: 'whatever'
+			},
+			item2 = {
+				key: 'whatever2'
+			},
+			item3 = {
+				key: 'whatever3'
+			};
+
+		ha.add(item1, item2, item3);
+		ha.remove(item2);
+
+		it('Should have 2 items after remove by key', function() {
+			assert.equal(ha.all.length, 2);
+		});
+
+		it('Should have no key for removed item (has)', function() {
+			assert.equal(ha.has('whatever2'), false);
+		});
+
+		it('Should have no key for removed item (get)', function() {
+			assert.equal(ha.get('whatever2'), undefined);
+		});
+
+		it('Should have remaining two items by key', function() {
+			assert.equal(ha.get('whatever'), item1);
+			assert.equal(ha.get('whatever3'), item3);
+		});
+	});
+});
