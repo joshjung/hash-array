@@ -274,7 +274,10 @@ describe('HashArray', function() {
 		ha.add(item1, item2, item3);
 		ha.callback = function(type, what) {
 			it('Should have a "remove" callback.', function() {
-				assert.equal(type, 'removeAll');
+				assert.equal(type, 'remove');
+				assert.strictEqual(what[0], item1);
+				assert.strictEqual(what[1], item2);
+				assert.strictEqual(what[2], item3);
 			});
 
 			it('Should have 0 items after removeAll', function() {

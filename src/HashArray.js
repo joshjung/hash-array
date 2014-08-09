@@ -93,11 +93,12 @@ HashArray.prototype = {
 		}
 	},
 	removeAll: function() {
+		var old = this._list.concat();
 		this._map = {};
 		this._list = [];
 
 		if (this.callback) {
-			this.callback('removeAll');
+			this.callback('remove', old);
 		}
 	},
 	find: function(obj, path) {
