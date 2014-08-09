@@ -37,7 +37,7 @@ HashArray.prototype = {
 			this._list.push(obj);
 		}
 		if (this.callback) {
-			this.callback('add', arguments);
+			this.callback('add', Array.prototype.slice.call(arguments, 0));
 		}
 	},
 	addMap: function(key, obj) {
