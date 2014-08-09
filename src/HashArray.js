@@ -1,6 +1,7 @@
-var HashArray = function(keyFields) {
+var HashArray = function(keyFields, callback) {
 	this._map = {};
 	this._list = [];
+	this.callback = callback;
 
 	this.keyFields = keyFields;
 
@@ -11,6 +12,10 @@ var HashArray = function(keyFields) {
 	this.__defineGetter__('map', function() {
 		return this._map;
 	});
+
+	if (callback) {
+		callback('construct');
+	}
 };
 
 HashArray.prototype = {
@@ -31,9 +36,18 @@ HashArray.prototype = {
 
 			this._list.push(obj);
 		}
+		if (this.callback) {
+			this.callback('add', arguments);
+		}
 	},
 	addMap: function(key, obj) {
 		this._map[key] = obj;
+		if (this.callback) {
+			this.callback('addMap', {
+				key: key,
+				obj: obj
+			});
+		}
 	},
 	get: function(key) {
 		return this._map[key];
@@ -42,10 +56,12 @@ HashArray.prototype = {
 		return this._map.hasOwnProperty(key);
 	},
 	removeByKey: function() {
+		var removed = [];
 		for (var i = 0; i < arguments.length; i++) {
 			var key = arguments[i];
 			var item = this._map[key];
 			if (item) {
+				removed.push(item);
 				for (var ix in this.keyFields) {
 					var key2 = this.find(item, this.keyFields[ix]);
 					if (key2)
@@ -54,6 +70,10 @@ HashArray.prototype = {
 				this._list.splice(this._list.indexOf(item), 1);
 			}
 			delete this._map[key];
+		}
+
+		if (this.callback) {
+			this.callback('removeByKey', removed);
 		}
 	},
 	remove: function() {
@@ -66,6 +86,18 @@ HashArray.prototype = {
 			}
 
 			this._list.splice(this._list.indexOf(arguments[i]), 1);
+		}
+
+		if (this.callback) {
+			this.callback('remove', arguments);
+		}
+	},
+	removeAll: function() {
+		this._map = {};
+		this._list = [];
+
+		if (this.callback) {
+			this.callback('removeAll');
 		}
 	},
 	find: function(obj, path) {

@@ -1,1 +1,1 @@
-module.exports = require('./src/HashArray');
+module.exports = require('./src/HashArray.js');

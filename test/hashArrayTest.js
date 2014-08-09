@@ -4,7 +4,11 @@ var assert = require('assert'),
 
 describe('HashArray', function() {
 	describe('new HashArray(keys) should work', function() {
-		var ha = new HashArray(['key']);
+		var ha = new HashArray(['key'], function(type) {
+			it('Should callback with "construct"', function() {
+				assert.equal(type, 'construct');
+			});
+		});
 
 		it('Should have a all.length of 0.', function() {
 			assert.equal(ha.all.length, 0);
@@ -21,6 +25,14 @@ describe('HashArray', function() {
 		var item = {
 			key: 'whatever'
 		};
+
+		ha.callback = function(type, what) {
+			it('Should have a "add" callback.', function() {
+				assert.equal(type, 'add');
+				assert.strictEqual(what[0], item);
+			});
+		};
+
 		ha.add(item);
 
 		it('Should have a single item.', function() {
@@ -37,6 +49,7 @@ describe('HashArray', function() {
 			'key', ['child', 'key'],
 			['child', 'key2']
 		]);
+
 		var item = {
 			key: 'whatever',
 			child: {
@@ -68,6 +81,15 @@ describe('HashArray', function() {
 			item3 = {
 				key: 'whatever3'
 			};
+
+		ha.callback = function(type, what) {
+			it('Should have a "add" callback.', function() {
+				assert.equal(type, 'add');
+				assert.strictEqual(what[0], item1);
+				assert.strictEqual(what[1], item2);
+				assert.strictEqual(what[2], item3);
+			});
+		};
 
 		ha.add(item1, item2, item3);
 
@@ -148,6 +170,12 @@ describe('HashArray', function() {
 			};
 
 		ha.add(item1, item2, item3);
+		ha.callback = function(type, what) {
+			it('Should have a "removeByKey" callback.', function() {
+				assert.equal(type, 'removeByKey');
+				assert.strictEqual(what[0], item1);
+			});
+		};
 		ha.removeByKey('whatever');
 
 		it('Should have 2 items after remove by key', function() {
@@ -174,6 +202,12 @@ describe('HashArray', function() {
 			key: 'whatever'
 		};
 		ha.add(item);
+		ha.callback = function(type, what) {
+			it('Should have a "remove" callback.', function() {
+				assert.equal(type, 'remove');
+				assert.strictEqual(what[0], item);
+			});
+		};
 		ha.remove(item);
 
 		it('Should have no items after remove', function() {
@@ -199,6 +233,12 @@ describe('HashArray', function() {
 			};
 
 		ha.add(item1, item2, item3);
+		ha.callback = function(type, what) {
+			it('Should have a "remove" callback.', function() {
+				assert.equal(type, 'remove');
+				assert.strictEqual(what[0], item2);
+			});
+		};
 		ha.remove(item2);
 
 		it('Should have 2 items after remove by key', function() {
@@ -217,5 +257,35 @@ describe('HashArray', function() {
 			assert.equal(ha.get('whatever'), item1);
 			assert.equal(ha.get('whatever3'), item3);
 		});
+	});
+
+	describe('removeAll() should work', function() {
+		var ha = new HashArray(['key']);
+		var item1 = {
+				key: 'whatever'
+			},
+			item2 = {
+				key: 'whatever2'
+			},
+			item3 = {
+				key: 'whatever3'
+			};
+
+		ha.add(item1, item2, item3);
+		ha.callback = function(type, what) {
+			it('Should have a "remove" callback.', function() {
+				assert.equal(type, 'removeAll');
+			});
+
+			it('Should have 0 items after removeAll', function() {
+				assert.equal(ha.all.length, 0);
+			});
+
+			it('Should have a map with no keys.', function() {
+				for (var key in ha.map)
+					assert.equal(key, undefined);
+			});
+		};
+		ha.removeAll();
 	});
 });
