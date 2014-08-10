@@ -44,6 +44,26 @@ describe('HashArray', function() {
 		});
 	});
 
+	describe('add(items) should not allow addition of same item twice.', function() {
+		var ha = new HashArray(['key']);
+		var item = {
+			key: 'whatever'
+		};
+
+		ha.add(item);
+		ha.add(item);
+		ha.add(item);
+		ha.add(item);
+
+		it('Should have a single item.', function() {
+			assert.equal(ha.all.length, 1);
+		});
+
+		it('Should map "whatever" to that item.', function() {
+			assert.equal(ha.get('whatever'), item);
+		});
+	});
+
 	describe('add(items) should work with 1 item and multiple keys and key depths.', function() {
 		var ha = new HashArray([
 			'key', ['child', 'key'],

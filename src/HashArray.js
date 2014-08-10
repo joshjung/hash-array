@@ -28,7 +28,8 @@ HashArray.prototype = {
 				if (inst) {
 					if (this._map[inst]) {
 						if (this._map[inst].indexOf(obj) != -1) {
-							continue;
+							// Cannot add the same item twice
+							return;
 						}
 						this._map[inst].push(obj);
 					} else this._map[inst] = [obj];
