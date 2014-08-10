@@ -63,7 +63,7 @@ HashArray.prototype = {
 		var removed = [];
 		for (var i = 0; i < arguments.length; i++) {
 			var key = arguments[i];
-			var items = this._map[key];
+			var items = this._map[key].concat();
 			if (items) {
 				removed = removed.concat(items);
 				for (var j in items) {
@@ -72,8 +72,9 @@ HashArray.prototype = {
 						var key2 = this.find(item, this.keyFields[ix]);
 						if (key2 && this._map[key2]) {
 							var ix = this._map[key2].indexOf(item);
-							if (ix != -1)
+							if (ix != -1) {
 								this._map[key2].splice(ix, 1);
+							}
 
 							if (this._map[key2].length == 0)
 								delete this._map[key2];

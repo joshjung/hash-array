@@ -80,6 +80,9 @@ describe('HashArray', function() {
 			},
 			item3 = {
 				key: 'whatever3'
+			},
+			item4 = {
+				key: 'whatever3'
 			};
 
 		ha.callback = function(type, what) {
@@ -88,17 +91,18 @@ describe('HashArray', function() {
 				assert.strictEqual(what[0], item1);
 				assert.strictEqual(what[1], item2);
 				assert.strictEqual(what[2], item3);
+				assert.strictEqual(what[3], item4);
 			});
 		};
 
-		ha.add(item1, item2, item3);
+		ha.add(item1, item2, item3, item4);
 
 		it('Should have 3 items', function() {
-			assert.equal(ha.all.length, 3);
+			assert.equal(ha.all.length, 4);
 		});
 
 		it('Should map "whatever" to item1', function() {
-			assert.equal(ha.get('whatever'), item1);
+			assert.deepEqual(ha.get('whatever'), item1);
 		});
 
 		it('Should map "whatever2" to item2', function() {
@@ -106,7 +110,7 @@ describe('HashArray', function() {
 		});
 
 		it('Should map "whatever3" to item3', function() {
-			assert.equal(ha.get('whatever3'), item3);
+			assert.deepEqual(ha.get('whatever3'), [item3, item4]);
 		});
 	});
 
@@ -157,7 +161,7 @@ describe('HashArray', function() {
 		});
 	});
 
-	describe('removeByKey(keys) should work with 3 items', function() {
+	describe('removeByKey(keys) should work with 4 items', function() {
 		var ha = new HashArray(['key']);
 		var item1 = {
 				key: 'whatever'
@@ -167,32 +171,37 @@ describe('HashArray', function() {
 			},
 			item3 = {
 				key: 'whatever3'
+			},
+			item4 = {
+				key: 'whatever3'
 			};
 
-		ha.add(item1, item2, item3);
+		console.log("START");
+		ha.add(item1, item2, item3, item4);
 		ha.callback = function(type, what) {
 			it('Should have a "removeByKey" callback.', function() {
 				assert.equal(type, 'removeByKey');
-				assert.strictEqual(what[0], item1);
+				assert.strictEqual(what[0], item3);
+				assert.strictEqual(what[1], item4);
 			});
 		};
-		ha.removeByKey('whatever');
+		ha.removeByKey('whatever3');
 
 		it('Should have 2 items after remove by key', function() {
 			assert.equal(ha.all.length, 2);
 		});
 
 		it('Should have no key for removed item (has)', function() {
-			assert.equal(ha.has('whatever'), false);
+			assert.equal(ha.has('whatever3'), false);
 		});
 
 		it('Should have no key for removed item (get)', function() {
-			assert.equal(ha.get('whatever'), undefined);
+			assert.equal(ha.get('whatever3'), undefined);
 		});
 
 		it('Should have remaining two items by key', function() {
+			assert.equal(ha.get('whatever'), item1);
 			assert.equal(ha.get('whatever2'), item2);
-			assert.equal(ha.get('whatever3'), item3);
 		});
 	});
 
