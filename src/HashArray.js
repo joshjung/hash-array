@@ -27,10 +27,11 @@ HashArray.prototype = {
 				var inst = this.find(obj, key);
 				if (inst) {
 					if (this._map[inst]) {
-						throw Error('HashArray key ' + obj[key] + ' already exists');
-					}
-
-					this._map[inst] = obj;
+						if (this._map[inst].indexOf(obj) != -1) {
+							continue;
+						}
+						this._map[inst].push(obj);
+					} else this._map[inst] = [obj];
 				}
 			}
 
@@ -50,24 +51,37 @@ HashArray.prototype = {
 		}
 	},
 	get: function(key) {
-		return this._map[key];
+		return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
 	},
 	has: function(key) {
 		return this._map.hasOwnProperty(key);
+	},
+	hasMultiple: function(key) {
+		return this._map[key] instanceof Array;
 	},
 	removeByKey: function() {
 		var removed = [];
 		for (var i = 0; i < arguments.length; i++) {
 			var key = arguments[i];
-			var item = this._map[key];
-			if (item) {
-				removed.push(item);
-				for (var ix in this.keyFields) {
-					var key2 = this.find(item, this.keyFields[ix]);
-					if (key2)
-						delete this._map[key2];
+			var items = this._map[key];
+			if (items) {
+				removed = removed.concat(items);
+				for (var j in items) {
+					var item = items[j];
+					for (var ix in this.keyFields) {
+						var key2 = this.find(item, this.keyFields[ix]);
+						if (key2 && this._map[key2]) {
+							var ix = this._map[key2].indexOf(item);
+							if (ix != -1)
+								this._map[key2].splice(ix, 1);
+
+							if (this._map[key2].length == 0)
+								delete this._map[key2];
+						}
+					}
+
+					this._list.splice(this._list.indexOf(item), 1);
 				}
-				this._list.splice(this._list.indexOf(item), 1);
 			}
 			delete this._map[key];
 		}
@@ -78,14 +92,20 @@ HashArray.prototype = {
 	},
 	remove: function() {
 		for (var i = 0; i < arguments.length; i++) {
+			var item = arguments[i];
 			for (var ix in this.keyFields) {
-				var key = this.find(arguments[i], this.keyFields[ix]);
+				var key = this.find(item, this.keyFields[ix]);
 				if (key) {
-					delete this._map[key];
+					var ix = this._map[key].indexOf(item);
+					if (ix != -1)
+						this._map[key].splice(ix, 1);
+
+					if (this._map[key].length == 0)
+						delete this._map[key];
 				}
 			}
 
-			this._list.splice(this._list.indexOf(arguments[i]), 1);
+			this._list.splice(this._list.indexOf(item), 1);
 		}
 
 		if (this.callback) {
