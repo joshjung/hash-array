@@ -63,6 +63,37 @@ Example
 
     console.log(ha.get(60616) === ha.get('Josh') == ha.get('Jung'));
 
+**Key Duplicates**
+
+If two items contain the same key, they are appended to an array at that key location.
+
+    var HashArray = require ('hasharray');
+    var ha = new HashArray([
+          ['name', 'last'],
+          ['name', 'first']
+        ]);
+    
+    ha.add({
+        name: {
+          first: 'Josh',
+          last: 'Jung'
+        }
+      },
+      {
+        name: {
+          first: 'Josh',
+          last: 'Mills'
+        }
+      },
+      {
+        name: {
+          first: 'Josh',
+          last: 'Willis'
+        }
+      });
+
+    console.log(ha.get('Josh').length); // Will be 3
+
 The MIT License (MIT)
 
 Copyright (c) 2014 Joshua Jung

@@ -2,11 +2,18 @@
 	"name": "hasharray",
 	"author": "Joshua Jung",
 	"description": "A data structure that combines a hash and an array for CRUD operations by object keys or index.",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"main": "index.js",
 	"url": "https://github.com/joshjung/hash-array",
 	"email": "joshua.p.jung@gmail.com",
 	"dependencies": {
 		"debug": "^1.0.4"
-	}
+	},
+	"keywords": [
+		"hash",
+		"hashtable",
+		"array",
+		"arraylist",
+		"dictionary"
+	]
 }
