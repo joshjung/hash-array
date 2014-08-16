@@ -144,3 +144,6 @@ HashArray.prototype = {
 };
 
 module.exports = HashArray;
+
+if (typeof window !== 'undefined')
+	window.HashArray = HashArray;
