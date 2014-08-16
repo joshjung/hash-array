@@ -135,6 +135,11 @@ HashArray.prototype = {
 		}
 
 		return obj;
+	},
+	clone: function(callback) {
+		var n = new HashArray(this.keyFields.concat(), callback ? callback : this.callback);
+		n.add.apply(n, this.all.concat());
+		return n;
 	}
 };
 

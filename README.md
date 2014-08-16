@@ -1,9 +1,9 @@
 hash-array
 ==========
 
-A data structure that combines a hash and an array for CRUD operations by object keys or index.
+A data structure that combines a hash and an array for add, remove and get operations by object keys or index.
 
-Complex key paths can be used.
+Multi-level key paths can be used (e.g. `'name'` as well as `['child', 'label']` etc.).
 
 Install
 =======
@@ -13,43 +13,47 @@ Install
 Testing
 =======
 
-    mocha
+    >mocha
+
+    START
+
+      ․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․
+
+      38 passing (24ms)
 
 Example
 =======
 
-**Simple Usage**
+**Basic Usage**
 
     var HashArray = require ('hasharray');
 
     // Create new hasharray with two key mappings.
     var ha = new HashArray(['name', 'zip']);
     
-    // Add 2 objects to the hash. Key mappings are automatically created.
+    // Add 2 objects to the hash.
     var item1 = {name: 'Josh', zip: '54321'};
     var item2 = {name: 'Josh', zip: '12345'};
     ha.add(item1, item2);
 
     if (ha.has('Josh'))
-    {
-      console.log(ha.get('Josh'));
-    }
+      console.log(ha.get('Josh')); // Will output two objects to the console
 
     // Display the number of unique objects. In this case, 2.
     console.log(ha.all.length);
 
-    // Remove an element by key
+    // Remove an element by one of the keys
     ha.removeByKey('54321'); // This removes item1
 
     // Remove item2 directly
-    ha.remove(item2); // This removes the first item that was added
+    ha.remove(item2);
 
-**Complex Keys**
+**Multi-level Keys**
 
     var HashArray = require ('hasharray');
     var ha = new HashArray([
-          ['name', 'last'],
-          ['name', 'first'],
+          ['name', 'last'], // Internally maps obj.name.last -> obj
+          ['name', 'first'], // Internally maps obj.name.first -> obj
           'zip'
         ]);
     
@@ -61,7 +65,7 @@ Example
         zip: 60616
       });
 
-    console.log(ha.get(60616) === ha.get('Josh') == ha.get('Jung'));
+    console.log(ha.get(60616) === ha.get('Josh') == ha.get('Jung')); // true
 
 **Key Duplicates**
 
@@ -93,6 +97,22 @@ If two items contain the same key, they are appended to an array at that key loc
       });
 
     console.log(ha.get('Josh').length); // Will be 3
+    console.log(ha.get('Willis')); // Will be {name: {first: 'Josh', last: 'Willis'} }
+
+**Cloning**
+
+Cloning makes a new HashArray clone of the original, ensuring that no Array objects are shared.
+
+Keep in mind that cloning does deep clone objects in the collection. Therefore if you clone an object with three Object items, the clonee will be a new HashArray but will contain references to the original objects.
+
+    var HashArray = require ('hasharray');
+    ...
+    var ha = new HashArray(['someKey']);
+    ...
+    var clonee = ha.clone();
+
+License
+=======
 
 The MIT License (MIT)
 

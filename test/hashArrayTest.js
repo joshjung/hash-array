@@ -320,4 +320,34 @@ describe('HashArray', function() {
 		};
 		ha.removeAll();
 	});
+
+	describe('clone() should work', function() {
+		var ha = new HashArray(['key']);
+		var item1 = {
+				key: 'whatever'
+			},
+			item2 = {
+				key: 'whatever2'
+			},
+			item3 = {
+				key: 'whatever3'
+			};
+
+		ha.add(item1, item2, item3);
+		var ha2 = ha.clone();
+
+		it('Should not strictly equal', function() {
+			assert.notStrictEqual(ha, ha2);
+		});
+
+		it('Should deep equal', function() {
+			assert.deepEqual(ha, ha2);
+		});
+
+		it('Original should not affect new one', function() {
+			ha.removeAll();
+			assert.strictEqual(ha.all.length, 0);
+			assert.strictEqual(ha2.all.length, 3);
+		});
+	});
 });
