@@ -5,20 +5,18 @@ var HashArray = function(keyFields, callback) {
 
 	this.keyFields = keyFields;
 
-	this.__defineGetter__('all', function() {
-		return this._list;
-	});
-
-	this.__defineGetter__('map', function() {
-		return this._map;
-	});
-
 	if (callback) {
 		callback('construct');
 	}
 };
 
 HashArray.prototype = {
+	get all() {
+		return this._list;
+	},
+	get map() {
+		return this._map;
+	},
 	add: function() {
 		for (var i = 0; i < arguments.length; i++) {
 			var obj = arguments[i];
