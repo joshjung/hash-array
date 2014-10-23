@@ -1,25 +1,26 @@
 {
-	"name": "hasharray",
-	"author": "Joshua Jung <joshua.p.jung@gmail.com>",
-	"license": "MIT",
-	"description": "A data structure that combines a hash and an array for CRUD operations by object keys or index.",
-	"version": "0.1.3",
-	"main": "index.js",
-	"url": "https://github.com/joshjung/hash-array",
-	"homepage": "https://github.com/joshjung/hash-array",
-	"email": "joshua.p.jung@gmail.com",
-	"dependencies": {
-		"debug": "^1.0.4"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/joshjung/hash-array.git"
-	},
-	"keywords": [
-		"hash",
-		"hashtable",
-		"array",
-		"arraylist",
-		"dictionary"
-	]
+  "name": "hasharray",
+  "author": "Joshua Jung <joshua.p.jung@gmail.com>",
+  "license": "MIT",
+  "description": "A data structure that combines a hash and an array for CRUD operations by object keys or index.",
+  "version": "0.1.4",
+  "main": "index.js",
+  "url": "https://github.com/joshjung/hash-array",
+  "homepage": "https://github.com/joshjung/hash-array",
+  "email": "joshua.p.jung@gmail.com",
+  "dependencies": {
+    "debug": "^1.0.4",
+    "jclass": "^0.2.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshjung/hash-array.git"
+  },
+  "keywords": [
+    "hash",
+    "hashtable",
+    "array",
+    "arraylist",
+    "dictionary"
+  ]
 }

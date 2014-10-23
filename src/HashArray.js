@@ -1,21 +1,16 @@
-var HashArray = function(keyFields, callback) {
-	this._map = {};
-	this._list = [];
-	this.callback = callback;
+var JClass = require('jclass');
 
-	this.keyFields = keyFields;
+var HashArray = JClass.extend({
+	init: function(keyFields, callback) {
+		this._map = {};
+		this._list = [];
+		this.callback = callback;
 
-	if (callback) {
-		callback('construct');
-	}
-};
+		this.keyFields = keyFields;
 
-HashArray.prototype = {
-	get all() {
-		return this._list;
-	},
-	get map() {
-		return this._map;
+		if (callback) {
+			callback('construct');
+		}
 	},
 	add: function() {
 		for (var i = 0; i < arguments.length; i++) {
@@ -139,7 +134,19 @@ HashArray.prototype = {
 		n.add.apply(n, this.all.concat());
 		return n;
 	}
-};
+});
+
+Object.defineProperty(HashArray.prototype, 'all', {
+	get: function () {
+		return this._list;
+	}
+});
+
+Object.defineProperty(HashArray.prototype, 'map', {
+	get: function () {
+		return this._map;
+	}
+});
 
 module.exports = HashArray;
 
