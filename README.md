@@ -48,6 +48,31 @@ Example
     // Remove item2 directly
     ha.remove(item2);
 
+** Retreiving Multiples of a Single Key (getAsArray) **
+
+    var ha = new HashArray(['firstName', 'lastName']);
+
+    var person1 = {firstName: 'Bill', lastName: 'William'},
+      person2 = {firstName: 'Bob', lastName: 'William'};
+
+    ha.add(person1, person2);
+
+    console.log(ha.getAsArray('William')); // [person1, person2]
+
+** Retrieving Sets by Multiple Keys (getAll) **
+
+    var ha = new HashArray(['firstName', 'lastName']);
+
+    var person1 = {firstName: 'Victor',  lastName: 'Victor'},
+      person2 =   {firstName: 'Victor',  lastName: 'Manning'},
+      person3 =   {firstName: 'Manning', lastName: 'Victor'};
+      person4 =   {firstName: 'John',    lastName: 'Smith'};
+
+    ha.add(person1, person2, person3, person4);
+
+    console.log(ha.getAll(['Victor', 'Smith'])); // [person1, person2, person3, person4]
+    console.log(ha.getAll(['John', 'Smith'])); // [person4]
+
 **Multi-level Keys**
 
     var HashArray = require ('hasharray');

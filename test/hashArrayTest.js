@@ -44,6 +44,29 @@ describe('HashArray', function() {
 		});
 	});
 
+  describe('add(items) should work with 2 item and duplicate keys', function() {
+    var ha = new HashArray(['key1', 'key2']);
+    var item1 = {
+      key1: 'whatever',
+      key2: 'whatever'
+    };
+    var item2 = {
+      key1: 'whatever',
+      key2: 'whatever'
+    };
+
+    ha.add(item1, item2);
+
+    it('Should have a 2 items.', function() {
+      assert.equal(ha.all.length, 2);
+    });
+
+    it('Should map "whatever" to both items in proper order.', function() {
+      assert.equal(ha.getAsArray('whatever')[0], item1);
+      assert.equal(ha.getAsArray('whatever')[1], item2);
+    });
+  });
+
 	describe('add(items) should not allow addition of same item twice.', function() {
 		var ha = new HashArray(['key']);
 		var item = {
@@ -350,4 +373,20 @@ describe('HashArray', function() {
 			assert.strictEqual(ha2.all.length, 3);
 		});
 	});
+
+  describe('getAll(keys) should work', function() {
+    var ha = new HashArray(['firstName', 'lastName']);
+
+    var person1 = {firstName: 'Victor', lastName: 'Victor'},
+      person2 =   {firstName: 'Victor', lastName: 'Manning'},
+      person3 =   {firstName: 'Manning', lastName: 'Victor'};
+      person4 =   {firstName: 'John', lastName: 'Smith'};
+
+    ha.add(person1, person2, person3, person4);
+    
+    it('Should retrieve only items for the keys requested without duplicates.', function() {
+      assert.equal(ha.getAll(['Victor', 'Smith']).length, 4);
+      assert.equal(ha.getAll(['John', 'Smith']).length, 1);
+    });
+  });
 });

@@ -14,7 +14,8 @@ var HashArray = JClass.extend({
 	},
 	add: function() {
 		for (var i = 0; i < arguments.length; i++) {
-			var obj = arguments[i];
+			var obj = arguments[i],
+        needsDupCheck = false;
 			for (var key in this.keyFields) {
 				key = this.keyFields[key];
 				var inst = this.find(obj, key);
@@ -22,14 +23,16 @@ var HashArray = JClass.extend({
 					if (this._map[inst]) {
 						if (this._map[inst].indexOf(obj) != -1) {
 							// Cannot add the same item twice
-							return;
+              needsDupCheck = true;
+							continue;
 						}
 						this._map[inst].push(obj);
 					} else this._map[inst] = [obj];
 				}
 			}
 
-			this._list.push(obj);
+      if (!needsDupCheck || this._list.indexOf(obj) == -1)
+			  this._list.push(obj);
 		}
 		if (this.callback) {
 			this.callback('add', Array.prototype.slice.call(arguments, 0));
@@ -47,6 +50,16 @@ var HashArray = JClass.extend({
 	get: function(key) {
 		return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
 	},
+  getAll: function(keys) {
+    var res = new HashArray(this.keyFields);
+    for (var key in keys)
+      res.add.apply(res, this.getAsArray(keys[key]));
+
+    return res.all;
+  },
+  getAsArray: function(key) {
+    return this._map[key] || [];
+  },
 	has: function(key) {
 		return this._map.hasOwnProperty(key);
 	},
