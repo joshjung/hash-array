@@ -38,6 +38,9 @@ var HashArray = JClass.extend({
 			this.callback('add', Array.prototype.slice.call(arguments, 0));
 		}
 	},
+  addAll: function (arr) {
+    this.add.apply(this, arr);
+  },
 	addMap: function(key, obj) {
 		this._map[key] = obj;
 		if (this.callback) {
@@ -59,6 +62,37 @@ var HashArray = JClass.extend({
   },
   getAsArray: function(key) {
     return this._map[key] || [];
+  },
+  getUniqueRandomIntegers: function (count, min, max) {
+    var res = [], map = {};
+
+    count = Math.min(max - min, count);
+    
+    while (res.length < count)
+    {
+      var r = Math.floor(min + (Math.random() * (max + 1)));
+      if (map[r]) continue;
+      map[r] = true;
+      res.push(r);
+    }
+
+    return res;
+  },
+  sample: function (count, keys) {
+    // http://en.wikipedia.org/wiki/Image_(mathematics)
+    var image = this.all,
+      ixs = {},
+      res = [];
+
+    if (keys)
+      image = this.getAll(keys);
+
+    var rand = this.getUniqueRandomIntegers(count, 0, image.length - 1);
+
+    for (var i = 0; i < rand.length; i++)
+      res.push(image[rand[i]]);
+
+    return res;
   },
 	has: function(key) {
 		return this._map.hasOwnProperty(key);
