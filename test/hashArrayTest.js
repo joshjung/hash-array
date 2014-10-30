@@ -389,4 +389,146 @@ describe('HashArray', function() {
       assert.equal(ha.getAll(['John', 'Smith']).length, 1);
     });
   });
+  
+  describe('forEach(keys, callback) should work', function() {
+    var ha = new HashArray(['type']);
+
+    var a = {type: 'airplane', data: {speed: 100, weight: 10000}},
+      b =   {type: 'airplane', data: {speed: 50, weight: 20000}},
+      c =   {type: 'airplane', data: {speed: 25, weight: 50000}};
+      d =   {type: 'boat', data: {speed: 10, weight: 100000}};
+      e =   {type: 'boat', data: {speed: 5, weight: 200000}};
+
+    ha.add(a, b, c, d, e);
+
+    it('should work.', function() {
+      var s = 0;
+
+      ha.forEach('airplane', function (airplane) {
+        s += airplane.data.speed;
+      });
+
+      assert.equal(s, 175);
+    });
+    
+    it('should work (speed test boats).', function() {
+      var s = 0;
+
+      ha.forEach(['boat'], function (item) {
+        s += item.data.speed;
+      });
+
+      assert.equal(s, 15);
+    });
+    
+    it('should work (speed test all).', function() {
+      var s = 0;
+
+      ha.forEach(['airplane', 'boat'], function (item) {
+        s += item.data.speed;
+      });
+
+      assert.equal(s, 190);
+    });
+  });
+  
+  describe('forEachDeep(keys, key, callback) should work', function() {
+    var ha = new HashArray(['type']);
+
+    var a = {type: 'airplane', data: {speed: 100, weight: 10000}},
+      b =   {type: 'airplane', data: {speed: 50, weight: 20000}},
+      c =   {type: 'airplane', data: {speed: 25, weight: 50000}};
+      d =   {type: 'boat', data: {speed: 10, weight: 100000}};
+      e =   {type: 'boat', data: {speed: 5, weight: 200000}};
+
+    ha.add(a, b, c, d, e);
+
+    it('should work (speed test airplanes).', function() {
+      var s = 0;
+
+      ha.forEachDeep('airplane', ['data', 'speed'], function (speed) {
+        s += speed;
+      });
+
+      assert.equal(s, 175);
+    });
+    
+    it('should work (speed test boats).', function() {
+      var s = 0;
+
+      ha.forEachDeep(['boat'], ['data', 'speed'], function (speed) {
+        s += speed;
+      });
+
+      assert.equal(s, 15);
+    });
+    
+    it('should work (speed test all).', function() {
+      var s = 0;
+
+      ha.forEachDeep(['airplane', 'boat'], ['data', 'speed'], function (speed) {
+        s += speed;
+      });
+
+      assert.equal(s, 190);
+    });
+  });
+  
+  describe('sum(keys, key) should work', function() {
+    var ha = new HashArray(['type']);
+
+    var a = {type: 'airplane', data: {speed: 100, weight: 10000}},
+      b =   {type: 'airplane', data: {speed: 50, weight: 20000}},
+      c =   {type: 'airplane', data: {speed: 25, weight: 50000}};
+      d =   {type: 'boat', data: {speed: 10, weight: 100000}};
+      e =   {type: 'boat', data: {speed: 5, weight: 200000}};
+
+    ha.add(a, b, c, d, e);
+
+    it('should work (speed test airplanes).', function() {
+      assert.equal(ha.sum('airplane', ['data', 'speed']), 175);
+    });
+    
+    it('should work (speed test boats).', function() {
+      assert.equal(ha.sum(['boat'], ['data', 'speed']), 15);
+    });
+    
+    it('should work (speed test all).', function() {
+      assert.equal(ha.sum(['airplane', 'boat'], ['data', 'speed']), 190);
+    });
+  });
+  
+  describe('average(keys, key, weight) should work', function() {
+    var ha = new HashArray(['type']);
+
+    var a = {type: 'airplane', data: {speed: 100, weight: 0.1}},
+      b =   {type: 'airplane', data: {speed: 50, weight: 0.2}},
+      c =   {type: 'airplane', data: {speed: 25, weight: 0.2}};
+      d =   {type: 'boat', data: {speed: 10, weight: 0.2}};
+      e =   {type: 'boat', data: {speed: 5, weight: 0.3}};
+
+    ha.add(a, b, c, d, e);
+
+    it('should work (speed test airplanes).', function() {
+      assert.equal(ha.average('airplane', ['data', 'speed']), 175 / 3);
+    });
+
+    it('should work (speed test boats).', function() {
+      assert.equal(ha.average(['boat'], ['data', 'speed']), 15 / 2);
+    });
+
+    it('should work (speed test all).', function() {
+      assert.equal(ha.average(['airplane', 'boat'], ['data', 'speed']), 190 / 5);
+    });
+
+    it('should work with weighted average == 1.0.', function() {
+      assert.equal(ha.average(['airplane', 'boat'], ['data', 'speed'], ['data', 'weight']), 28.5);
+    });
+
+    it('should work with weighted average != 1.0.', function() {
+      a.data.weight = 1.1;
+      
+      assert.equal(ha.average(['airplane', 'boat'], ['data', 'speed'], ['data', 'weight']), 64.25);
+    });
+  });
 });

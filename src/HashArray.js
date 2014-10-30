@@ -181,11 +181,56 @@ var HashArray = JClass.extend({
 
 		return obj;
 	},
+  forEach: function(keys, callback) {
+    keys = keys instanceof Array ? keys : [keys];
+
+    var objs = this.getAll(keys);
+
+    objs.forEach(callback);
+  },
+  forEachDeep: function(keys, key, callback) {
+    keys = keys instanceof Array ? keys : [keys];
+
+    var self = this,
+      objs = this.getAll(keys);
+
+    objs.forEach(function (item) {
+      callback(self.find(item, key), item);
+    });
+  },
 	clone: function(callback) {
 		var n = new HashArray(this.keyFields.concat(), callback ? callback : this.callback);
 		n.add.apply(n, this.all.concat());
 		return n;
-	}
+	},
+  sum: function(keys, key) {
+    var ret = 0;
+    this.forEachDeep(keys, key, function (value) {
+      ret += value;
+    });
+    return ret;
+  },
+  average: function(keys, key, weightKey) {
+    var ret = 0,
+      tot = 0,
+      weightsTotal = 0,
+      self = this;
+
+    if (weightKey !== undefined)
+      this.forEachDeep(keys, weightKey, function (value) {
+        weightsTotal += value;
+      })
+
+    this.forEachDeep(keys, key, function (value, item) {
+      if (weightKey !== undefined)
+        value *= (self.find(item, weightKey) / weightsTotal);
+
+      ret += value;
+      tot++;
+    });
+
+    return weightKey !== undefined ? ret : ret / tot;
+  }
 });
 
 Object.defineProperty(HashArray.prototype, 'all', {
