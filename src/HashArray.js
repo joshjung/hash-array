@@ -8,6 +8,8 @@ var HashArray = JClass.extend({
 
 		this.keyFields = keyFields;
 
+    this.isHashArray = true;
+    
 		if (callback) {
 			callback('construct');
 		}
@@ -59,6 +61,11 @@ var HashArray = JClass.extend({
 		return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
 	},
   getAll: function(keys) {
+    keys = keys instanceof Array ? keys : [keys];
+
+    if (keys[0] == '*')
+      return this.all;
+
     var res = new HashArray(this.keyFields);
     for (var key in keys)
       res.add.apply(res, this.getAsArray(keys[key]));
@@ -203,9 +210,12 @@ var HashArray = JClass.extend({
 		n.add.apply(n, this.all.concat());
 		return n;
 	},
-  sum: function(keys, key) {
+  sum: function(keys, key, weightKey) {
     var ret = 0;
     this.forEachDeep(keys, key, function (value) {
+      if (weightKey !== undefined)
+        value *= self.find(item, weightKey);
+
       ret += value;
     });
     return ret;
@@ -230,6 +240,20 @@ var HashArray = JClass.extend({
     });
 
     return weightKey !== undefined ? ret : ret / tot;
+  },
+  filter: function (keys, callbackOrKey) {
+    var self = this;
+    
+    var callback = (typeof(callbackOrKey) == 'function') ? callbackOrKey : defaultCallback;
+
+    var ha = new HashArray(this.keyFields);
+    ha.addAll(this.getAll(keys).filter(callback));
+    return ha;
+    
+    function defaultCallback(item) {
+      var val = self.find(item, callbackOrKey);
+      return val !== undefined && val !== false;
+    }
   }
 });
 

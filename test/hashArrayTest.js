@@ -531,4 +531,36 @@ describe('HashArray', function() {
       assert.equal(ha.average(['airplane', 'boat'], ['data', 'speed'], ['data', 'weight']), 64.25);
     });
   });
+  
+  describe('filter(keys, callback) should work and return new HashArray', function() {
+    var ha = new HashArray(['type']);
+
+    var a = {type: 'airplane', data: {speed: 100, weight: 0.1, mobile: true}},
+      b =   {type: 'airplane', data: {speed: 50, weight: 0.2, mobile: true}},
+      c =   {type: 'airplane', data: {speed: 25, weight: 0.2, mobile: false}};
+      d =   {type: 'boat', data: {speed: 10, weight: 0.2, mobile: true}};
+      e =   {type: 'boat', data: {speed: 5, weight: 0.3, mobile: true}};
+
+    ha.add(a, b, c, d, e);
+
+    it('should return a new HashArray', function() {
+      assert.equal(ha.filter('*', function (item) {
+        return item.data.speed == 100;
+      }).isHashArray, true);
+    });
+
+    it('should return a new HashArray with the right length of items', function() {
+      assert.equal(ha.filter('*', function (item) {
+        return item.data.speed == 100;
+      }).all.length, 1);
+    });
+
+    it('should work with a key for the callback', function() {
+      assert.equal(ha.filter('airplane', ['data', 'mobile']).all.length, 2);
+    });
+
+    it('should work with a key for the callback for a non-existent key', function() {
+      assert.equal(ha.filter('airplane', 'does not exist').all.length, 0);
+    });
+  });
 });
