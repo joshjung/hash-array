@@ -39,7 +39,12 @@ var HashArray = JClass.extend({
 		}
 	},
   addAll: function (arr) {
-    this.add.apply(this, arr);
+    if (arr.length < 100)
+      this.add.apply(this, arr);
+    else {
+      for (var i = 0; i < arr.length; i++)
+        this.add(arr[i]);
+    }
   },
 	addMap: function(key, obj) {
 		this._map[key] = obj;
@@ -66,7 +71,7 @@ var HashArray = JClass.extend({
   getUniqueRandomIntegers: function (count, min, max) {
     var res = [], map = {};
 
-    count = Math.min(max - min, count);
+    count = Math.min(Math.max(max - min, 1), count);
     
     while (res.length < count)
     {
