@@ -1,9 +1,49 @@
 hash-array
 ==========
 
-A data structure that combines a hash and an array for add, remove and get operations by object keys or index.
+HashArray is a data structure that combines the best features of a hash and an array.  Among other things, it includes `add()`, `remove()` and `get()` operations work for both simple (`'prop'`) and deep keys (`['someChild', 'childProp']`).
 
-Multi-level key paths can be used (e.g. `'name'` as well as `['child', 'label']` etc.).
+Purpose
+=======
+
+HashMap(HashTable) lookup by key is O(1), whereas finding items in an Array is O(N). My goal with this data structure was to attempt to get the ordered features of an Array while making lookup O(1). The cost is small loss of memory.
+
+In addition, I realized that Javascript data structures are multi-level. Consider an Array with a structure like this:
+
+     var customers = [{
+       id: 1337,
+       name: {
+         first: 'Bob',
+         last: 'Winkle,
+       }
+       dob: new Date(1985, 1, 4),
+       address: {
+         city: 'Chicago',
+         zip: 60616
+       }
+     }...]
+   
+If we had multiple people who lived in the zip code 60616, ideally we would want to index the data by zip code so that if we had to rapidly retrieve all those people we could do so.
+
+This data structure allows you to index the data by any number of keys. For example, we could index the above data like so:
+
+   var HashArray = require('hasharray');
+   var ha = new HashArray(['id', ['name', 'first'], ['name', 'last']]);
+   ha.addAll(customers);
+
+Now if we wanted to we could retrieve every single customer that has the first name of 'Bob' in O(1) time by doing so:
+
+   // At this point we have indexed everything by ['name', 'first'] so there is already an array built internal to `ha` that
+   // contains all the 'Bob' customers. So this operation is O(1).
+   var bobs = ha.get('Bob');
+   
+Note: the order of the `bobs` array above will be the order in which they were inserted.
+
+This said, if you want to determine the length of all customers added in O(1), it is as simple as:
+
+   ha.all.length; // ha.all is an ordered array of all customers in the order in which they were added!
+
+At this time, I am also working on adding functions for statistical analysis, like `sum(...)`. See the tests for more information. I'll be adding more to this documentation as I go.
 
 Install
 =======
@@ -19,7 +59,7 @@ Testing
 
       ․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․
 
-      38 passing (24ms)
+      60 passing (25ms)
 
 Example
 =======
