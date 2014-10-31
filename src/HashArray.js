@@ -211,8 +211,9 @@ var HashArray = JClass.extend({
 		return n;
 	},
   sum: function(keys, key, weightKey) {
-    var ret = 0;
-    this.forEachDeep(keys, key, function (value) {
+    var self = this,
+      ret = 0;
+    this.forEachDeep(keys, key, function (value, item) {
       if (weightKey !== undefined)
         value *= self.find(item, weightKey);
 

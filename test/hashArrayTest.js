@@ -496,6 +496,10 @@ describe('HashArray', function() {
     it('should work (speed test all).', function() {
       assert.equal(ha.sum(['airplane', 'boat'], ['data', 'speed']), 190);
     });
+    
+    it('should work with weighted sums.', function() {
+      assert.equal(ha.sum('boat', ['data', 'speed'], ['data', 'weight']), (10 * 100000) + (5 * 200000));
+    });
   });
   
   describe('average(keys, key, weight) should work', function() {
