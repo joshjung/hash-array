@@ -1,14 +1,16 @@
 hash-array
 ==========
 
-HashArray is a data structure that combines the best features of a hash and an array.  Among other things, it includes `add()`, `remove()` and `get()` operations work for both simple (`'prop'`) and deep keys (`['someChild', 'childProp']`).
+HashArray is a data structure that combines the best features of a hash and an array.
+
+Among other things, it includes `add()`, `remove()` and `get()` operations that work for both simple keys like `'prop'` and deep keys like `['someChild', 'childProp']`.
 
 Purpose
 =======
 
-HashMap(HashTable) lookup by key is O(1), whereas finding items in an Array is O(N). My goal with this data structure was to attempt to get the ordered features of an Array while making lookup O(1). The cost is small loss of memory.
+A HashMap (aka Hash Table) lookup items by key in O(1), whereas looking up items in an Array is O(N). My goal with this data structure was to attempt to get the ordered features of an Array while keeping lookup O(1) for any set of arbitrary keys. The cost is a small loss of memory.
 
-In addition, I realized that Javascript data structures are multi-level. Consider an Array with a structure like this:
+In addition, I realized that often Javascript data structures are multi-level. Consider an Array with a structure like this:
 
      var customers = [{
        id: 1337,
@@ -23,25 +25,25 @@ In addition, I realized that Javascript data structures are multi-level. Conside
        }
      }...]
    
-If we had multiple people who lived in the zip code 60616, ideally we would want to index the data by zip code so that if we had to rapidly retrieve all those people we could do so.
+If we had multiple people who lived in the zip code `60616`, ideally we would want to index the data by zip code so that if we had to rapidly retrieve all those people we could do so.
 
-This data structure allows you to index the data by any number of keys. For example, we could index the above data like so:
+HashArray allows you to do just that. For example, we could index the above data like so:
 
-   var HashArray = require('hasharray');
-   var ha = new HashArray(['id', ['name', 'first'], ['name', 'last']]);
-   ha.addAll(customers);
+    var HashArray = require('hasharray'),
+    ha = new HashArray(['id', ['name', 'first'], ['name', 'last']]);
+    ha.addAll(customers);
 
 Now if we wanted to we could retrieve every single customer that has the first name of 'Bob' in O(1) time by doing so:
 
-   // At this point we have indexed everything by ['name', 'first'] so there is already an array built internal to `ha` that
-   // contains all the 'Bob' customers. So this operation is O(1).
-   var bobs = ha.get('Bob');
+    // At this point we have indexed everything by ['name', 'first'] so there is already an array built internal to `ha` that
+    // contains all the 'Bob' customers. So this operation is O(1).
+    var bobs = ha.get('Bob');
    
 Note: the order of the `bobs` array above will be the order in which they were inserted.
 
-This said, if you want to determine the length of all customers added in O(1), it is as simple as:
+Normally when you use a standard JavaScript Object to map keys to values, the only way to retrieve the count of objects is to loop over all the keys which is O(n). However, with HashArray if you want to determine the length of all customers in O(1), it is as simple as:
 
-   ha.all.length; // ha.all is an ordered array of all customers in the order in which they were added!
+    ha.all.length; // in addition, ha.all is an ordered array of all customers in the order in which they were added!
 
 At this time, I am also working on adding functions for statistical analysis, like `sum(...)`. See the tests for more information. I'll be adding more to this documentation as I go.
 
@@ -61,8 +63,8 @@ Testing
 
       60 passing (25ms)
 
-Example
-=======
+Examples
+========
 
 **Basic Usage**
 
@@ -163,6 +165,48 @@ If two items contain the same key, they are appended to an array at that key loc
 
     console.log(ha.get('Josh').length); // Will be 3
     console.log(ha.get('Willis')); // Will be {name: {first: 'Josh', last: 'Willis'} }
+
+** forEach(keys, callback) **
+
+    // Here we index by item.type and item.data.speed
+    var ha = new HashArray(['type', ['data', 'speed']]);
+
+    var a = {type: 'airplane', data: {speed: 100, weight: 10000}},
+      b =   {type: 'airplane', data: {speed: 100, weight: 20000}},
+      c =   {type: 'airplane', data: {speed: 25, weight: 50000}};
+      d =   {type: 'boat', data: {speed: 10, weight: 100000}};
+      e =   {type: 'boat', data: {speed: 5, weight: 200000}};
+
+    ha.add(a, b, c, d, e);
+    
+    // Loop through just airplanes
+    ha.forEach('airplane', function (airplane) {console.log(airplane);});
+    
+    // Loop through airplanes AND boats
+    ha.forEach(['airplane', 'boat'], function (airplane) {console.log(airplane);});
+
+    // Loop through all items that have a speed of 100
+    ha.forEach(100, function (airplane) {console.log(airplane);});
+
+** forEachDeep(keys, key, callback) **
+
+`forEachDeep()` differs from `forEach()` in that it passes a value by key you specify to the `callback`:
+
+    // Here we index by item.type and item.data.speed
+    var ha = new HashArray(['type', ['data', 'speed']]);
+
+    var a = {type: 'airplane', data: {speed: 100, weight: 10000}},
+      b =   {type: 'airplane', data: {speed: 100, weight: 20000}},
+      c =   {type: 'airplane', data: {speed: 25, weight: 50000}};
+      d =   {type: 'boat', data: {speed: 10, weight: 100000}};
+      e =   {type: 'boat', data: {speed: 5, weight: 200000}};
+
+    ha.add(a, b, c, d, e);
+
+    // Loop through all items that have a speed of 100 and only pass the speed to the callback
+    ha.forEachDeep(100, ['data', 'speed'], function (speed) {
+      console.log('Speed is: ' + speed);
+    });
 
 **Cloning**
 
