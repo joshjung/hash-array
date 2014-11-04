@@ -36,7 +36,7 @@ In addition HashArray works with deep keys. Consider the following array of cust
        id: 1337,
        name: {
          first: 'Bob',
-         last: 'Winkle,
+         last: 'Winkle',
        },
        dob: new Date(1985, 1, 4),
        address: {
