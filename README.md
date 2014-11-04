@@ -244,7 +244,7 @@ HashArray uses [jclass](https://www.npmjs.org/package/jclass), which is an imple
 
 You can easily extend HashArray:
 
-    var MyCustomHashArray = HashArray.extend({
+    var MyCustomHashArray = HashArray._extend({
       ...
       init: function (keyFields) 
       {
