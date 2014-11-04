@@ -18,6 +18,12 @@ describe('HashArray', function() {
 			for (var key in ha.map)
 				assert.equal(true, false);
 		});
+    
+		var ha2 = new HashArray('key');
+
+		it('should work with a single key not wrapped in an array.', function() {
+				assert.deepEqual(ha2.keyFields, ['key']);
+		});
 	});
 
 	describe('add(items) should work with 1 item', function() {

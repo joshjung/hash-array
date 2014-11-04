@@ -2,6 +2,8 @@ var JClass = require('jclass');
 
 var HashArray = JClass.extend({
 	init: function(keyFields, callback) {
+    keyFields = keyFields instanceof Array ? keyFields : [keyFields];
+
 		this._map = {};
 		this._list = [];
 		this.callback = callback;

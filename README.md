@@ -1,23 +1,43 @@
-hash-array
-==========
+![](https://nodei.co/npm/hasharray.png?downloads=True&stars=True)
 
-HashArray is a data structure that combines the best features of a hash and an array.
+HashArray
+=========
 
-Among other things, it includes `add()`, `remove()` and `get()` operations that work for both simple keys like `'prop'` and deep keys like `['someChild', 'childProp']`.
+HashArray is a data structure that combines the best features of a hash and an array. Think of it as a super-lightweight, extensible, self-indexing database in memory.
+
+Among other things, it includes `add(...)`, `addAll(...)`, `remove(...)`, `forEach(...)` and `get(...)` operations that work for both simple keys like `'prop'` and deep keys like `['someChild', 'childProp']`.
+
+Install
+=======
+
+    npm install hasharray
+
+Simplest Use Case
+=================
+
+    var HashArray = require('hasharray');
+    var ha = new HashArray('id');
+
+    ha.add({id: 'someId0', name: 'Josh'},
+           {id: 'someId1', name: 'Joseph'},
+           {id: 'someId2', name: 'Kuba'},
+           {id: 'someId3', name: 'Ty'});
+
+    console.log(ha.get('someId0').name); // 'Kuba'
 
 Purpose
 =======
 
-A HashMap (aka Hash Table) lookup items by key in O(1), whereas looking up items in an Array is O(N). My goal with this data structure was to attempt to get the ordered features of an Array while keeping lookup O(1) for any set of arbitrary keys. The cost is a small loss of memory.
+My goal with this data structure was to attempt to get the ordered features of an Array while keeping lookup O(1) for any arbitrary keys. The cost is a small loss of memory.
 
-In addition, I realized that often Javascript data structures are multi-level. Consider an Array with a structure like this:
+In addition HashArray works with deep keys. Consider the following array of customer objects:
 
      var customers = [{
        id: 1337,
        name: {
          first: 'Bob',
          last: 'Winkle,
-       }
+       },
        dob: new Date(1985, 1, 4),
        address: {
          city: 'Chicago',
@@ -27,18 +47,16 @@ In addition, I realized that often Javascript data structures are multi-level. C
    
 If we had multiple people who lived in the zip code `60616`, ideally we would want to index the data by zip code so that if we had to rapidly retrieve all those people we could do so.
 
-HashArray allows you to do just that. For example, we could index the above data like so:
+With HashArray, we could index the above data for O(1) retrieval by `id`, `['name', 'first']`, and `['name', 'last]` like so:
 
     var HashArray = require('hasharray'),
     ha = new HashArray(['id', ['name', 'first'], ['name', 'last']]);
     ha.addAll(customers);
 
-Now if we wanted to we could retrieve every single customer that has the first name of 'Bob' in O(1) time by doing so:
-
     // At this point we have indexed everything by ['name', 'first'] so there is already an array built internal to `ha` that
     // contains all the 'Bob' customers. So this operation is O(1).
     var bobs = ha.get('Bob');
-   
+
 Note: the order of the `bobs` array above will be the order in which they were inserted.
 
 Normally when you use a standard JavaScript Object to map keys to values, the only way to retrieve the count of objects is to loop over all the keys which is O(n). However, with HashArray if you want to determine the length of all customers in O(1), it is as simple as:
@@ -47,26 +65,11 @@ Normally when you use a standard JavaScript Object to map keys to values, the on
 
 At this time, I am also working on adding functions for statistical analysis, like `sum(...)`. See the tests for more information. I'll be adding more to this documentation as I go.
 
-Install
-=======
-
-    npm install hasharray
-
-Testing
-=======
-
-    >mocha
-
-    START
-
-      ․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․
-
-      60 passing (25ms)
-
 Examples
 ========
 
-**Basic Usage**
+Basic Usage
+-----------
 
     var HashArray = require ('hasharray');
 
@@ -90,32 +93,8 @@ Examples
     // Remove item2 directly
     ha.remove(item2);
 
-** Retreiving Multiples of a Single Key (getAsArray) **
-
-    var ha = new HashArray(['firstName', 'lastName']);
-
-    var person1 = {firstName: 'Bill', lastName: 'William'},
-      person2 = {firstName: 'Bob', lastName: 'William'};
-
-    ha.add(person1, person2);
-
-    console.log(ha.getAsArray('William')); // [person1, person2]
-
-** Retrieving Sets by Multiple Keys (getAll) **
-
-    var ha = new HashArray(['firstName', 'lastName']);
-
-    var person1 = {firstName: 'Victor',  lastName: 'Victor'},
-      person2 =   {firstName: 'Victor',  lastName: 'Manning'},
-      person3 =   {firstName: 'Manning', lastName: 'Victor'};
-      person4 =   {firstName: 'John',    lastName: 'Smith'};
-
-    ha.add(person1, person2, person3, person4);
-
-    console.log(ha.getAll(['Victor', 'Smith'])); // [person1, person2, person3, person4]
-    console.log(ha.getAll(['John', 'Smith'])); // [person4]
-
-**Multi-level Keys**
+Deep Keys
+---------
 
     var HashArray = require ('hasharray');
     var ha = new HashArray([
@@ -134,7 +113,35 @@ Examples
 
     console.log(ha.get(60616) === ha.get('Josh') == ha.get('Jung')); // true
 
-**Key Duplicates**
+getAsArray(...): Retrieving Multiples of a Single Key
+-----------------------------------------------------
+
+    var ha = new HashArray(['firstName', 'lastName']);
+
+    var person1 = {firstName: 'Bill', lastName: 'William'},
+      person2 = {firstName: 'Bob', lastName: 'William'};
+
+    ha.add(person1, person2);
+
+    console.log(ha.getAsArray('William')); // [person1, person2]
+
+getAll(...): Retrieving Sets by Multiple Keys
+---------------------------------------------
+
+    var ha = new HashArray(['firstName', 'lastName']);
+
+    var person1 = {firstName: 'Victor',  lastName: 'Victor'},
+      person2 =   {firstName: 'Victor',  lastName: 'Manning'},
+      person3 =   {firstName: 'Manning', lastName: 'Victor'};
+      person4 =   {firstName: 'John',    lastName: 'Smith'};
+
+    ha.add(person1, person2, person3, person4);
+
+    console.log(ha.getAll(['Victor', 'Smith'])); // [person1, person2, person3, person4]
+    console.log(ha.getAll(['John', 'Smith'])); // [person4]
+
+Key Duplicates
+--------------
 
 If two items contain the same key, they are appended to an array at that key location.
 
@@ -166,7 +173,15 @@ If two items contain the same key, they are appended to an array at that key loc
     console.log(ha.get('Josh').length); // Will be 3
     console.log(ha.get('Willis')); // Will be {name: {first: 'Josh', last: 'Willis'} }
 
-** forEach(keys, callback) **
+has(...): duplicate check
+-------------------------
+
+If you need to check if an item already exists for a given key, simply use `has(...)`:
+
+    ha.has('someKeyValue');
+
+forEach(keys, callback): looping over sets of items
+---------------------------------------------------
 
     // Here we index by item.type and item.data.speed
     var ha = new HashArray(['type', ['data', 'speed']]);
@@ -188,7 +203,8 @@ If two items contain the same key, they are appended to an array at that key loc
     // Loop through all items that have a speed of 100
     ha.forEach(100, function (airplane) {console.log(airplane);});
 
-** forEachDeep(keys, key, callback) **
+forEachDeep(keys, key, callback)
+--------------------------------
 
 `forEachDeep()` differs from `forEach()` in that it passes a value by key you specify to the `callback`:
 
@@ -208,7 +224,8 @@ If two items contain the same key, they are appended to an array at that key loc
       console.log('Speed is: ' + speed);
     });
 
-**Cloning**
+Cloning
+-------
 
 Cloning makes a new HashArray clone of the original, ensuring that no Array objects are shared.
 
@@ -219,6 +236,38 @@ Keep in mind that cloning does deep clone objects in the collection. Therefore i
     var ha = new HashArray(['someKey']);
     ...
     var clonee = ha.clone();
+
+Extending
+---------
+
+HashArray uses [jclass](https://www.npmjs.org/package/jclass), which is an implementation of [John Resig's simple inheritance model](http://ejohn.org/blog/simple-javascript-inheritance/).
+
+You can easily extend HashArray:
+
+    var MyCustomHashArray = HashArray.extend({
+      ...
+      init: function (keyFields) 
+      {
+        console.log('My custom hash array!');
+        this._super(keyFields);
+      }
+      ...
+    });
+    
+    var myCustomHashArray = new MyCustomHashArray();
+
+See the `jclass` documentation for more information.
+
+Testing
+=======
+
+    >mocha
+
+    START
+
+      ․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․
+
+      61 passing (25ms)
 
 License
 =======
