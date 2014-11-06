@@ -41,6 +41,8 @@ var HashArray = JClass._extend({
 		if (this.callback) {
 			this.callback('add', Array.prototype.slice.call(arguments, 0));
 		}
+    
+    return this;
 	},
   addAll: function (arr) {
     if (arr.length < 100)
@@ -49,6 +51,8 @@ var HashArray = JClass._extend({
       for (var i = 0; i < arr.length; i++)
         this.add(arr[i]);
     }
+    
+    return this;
   },
 	addMap: function(key, obj) {
 		this._map[key] = obj;
@@ -58,6 +62,8 @@ var HashArray = JClass._extend({
 				obj: obj
 			});
 		}
+    
+    return this;
 	},
 	get: function(key) {
 		return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
@@ -145,6 +151,8 @@ var HashArray = JClass._extend({
 		if (this.callback) {
 			this.callback('removeByKey', removed);
 		}
+    
+    return this;
 	},
 	remove: function() {
 		for (var i = 0; i < arguments.length; i++) {
@@ -167,6 +175,8 @@ var HashArray = JClass._extend({
 		if (this.callback) {
 			this.callback('remove', arguments);
 		}
+    
+    return this;
 	},
 	removeAll: function() {
 		var old = this._list.concat();
@@ -176,6 +186,8 @@ var HashArray = JClass._extend({
 		if (this.callback) {
 			this.callback('remove', old);
 		}
+    
+    return this;
 	},
 	find: function(obj, path) {
 		if (typeof path === 'string') {
@@ -196,6 +208,8 @@ var HashArray = JClass._extend({
     var objs = this.getAll(keys);
 
     objs.forEach(callback);
+    
+    return this;
   },
   forEachDeep: function(keys, key, callback) {
     keys = keys instanceof Array ? keys : [keys];
@@ -206,6 +220,8 @@ var HashArray = JClass._extend({
     objs.forEach(function (item) {
       callback(self.find(item, key), item);
     });
+    
+    return this;
   },
 	clone: function(callback) {
 		var n = new HashArray(this.keyFields.concat(), callback ? callback : this.callback);

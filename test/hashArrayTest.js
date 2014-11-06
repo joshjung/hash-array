@@ -573,4 +573,25 @@ describe('HashArray', function() {
       assert.equal(ha.filter('airplane', 'does not exist').all.length, 0);
     });
   });
+  
+  describe('methods without a standard return should return this.', function() {
+    var ha = new HashArray('type');
+    var item = {type: 'blah'};
+    
+    it('add(...) should return this', function() {
+      assert(ha.add(item) === ha);
+    });
+    
+    it('addAll(...) should return this', function() {
+      assert(ha.addAll([{type: 'blah2'}]) === ha);
+    });
+    
+    it('remove(...) should return this', function() {
+      assert(ha.remove(item) === ha);
+    });
+    
+    it('removeByKey(...) should return this', function() {
+      assert(ha.removeByKey('blah2') === ha);
+    });
+  });
 });
