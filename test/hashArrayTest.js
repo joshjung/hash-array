@@ -573,7 +573,7 @@ describe('HashArray', function() {
       assert.equal(ha.filter('airplane', 'does not exist').all.length, 0);
     });
   });
-  
+
   describe('methods without a standard return should return this.', function() {
     var ha = new HashArray('type');
     var item = {type: 'blah'};
