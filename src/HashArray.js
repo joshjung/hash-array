@@ -65,6 +65,25 @@ var HashArray = JClass._extend({
     
     return this;
 	},
+  /**
+   * Returns a new HashArray that contains the intersection between this hash array and the hasharray passed in.
+   */
+  union: function (other) {
+    var self = this;
+
+    if (!other || !other.isHashArray)
+      throw Error('Cannot HashArray.union() on a non-hasharray object. You passed in: ', other);
+
+    var ret = this.clone(null, true),
+      allItems = this.clone(null, true).addAll(this.all.concat(other.all));
+
+    allItems.all.forEach(function (item) {
+      if (self.collides(item) && other.collides(item))
+        ret.add(item);
+    });
+
+    return ret;
+  },
 	get: function(key) {
 		return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
 	},
@@ -117,6 +136,13 @@ var HashArray = JClass._extend({
 	has: function(key) {
 		return this._map.hasOwnProperty(key);
 	},
+  collides: function (item) {
+    for (var k in this.keyFields)
+      if (this.has(this.find(item, this.keyFields[k])))
+        return true;
+    
+    return false;
+  },
 	hasMultiple: function(key) {
 		return this._map[key] instanceof Array;
 	},
@@ -223,9 +249,10 @@ var HashArray = JClass._extend({
     
     return this;
   },
-	clone: function(callback) {
+	clone: function(callback, ignoreItems) {
 		var n = new HashArray(this.keyFields.concat(), callback ? callback : this.callback);
-		n.add.apply(n, this.all.concat());
+    if (!ignoreItems)
+      n.add.apply(n, this.all.concat());
 		return n;
 	},
   sum: function(keys, key, weightKey) {

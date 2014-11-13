@@ -48,6 +48,14 @@ describe('HashArray', function() {
 		it('Should map "whatever" to that item.', function() {
 			assert.equal(ha.get('whatever'), item);
 		});
+    
+		it('Should return true to a collides for a similar object.', function() {
+			assert.equal(ha.collides({key: 'whatever'}), true);
+		});
+    
+		it('Should return false to a collides for a non-similar object.', function() {
+			assert.equal(ha.collides({otherKey: 'whatever'}), false);
+		});
 	});
 
   describe('add(items) should work with 2 item and duplicate keys', function() {
@@ -71,6 +79,11 @@ describe('HashArray', function() {
       assert.equal(ha.getAsArray('whatever')[0], item1);
       assert.equal(ha.getAsArray('whatever')[1], item2);
     });
+    
+		it('Should return true to a collides for a similar object.', function() {
+			assert.equal(ha.collides({key1: 'whatever'}), true);
+      assert.equal(ha.collides({key2: 'whatever'}), true);
+		});
   });
 
 	describe('add(items) should not allow addition of same item twice.', function() {
@@ -349,8 +362,8 @@ describe('HashArray', function() {
 		};
 		ha.removeAll();
 	});
-
-	describe('clone() should work', function() {
+  
+	describe('removeAll() should work', function() {
 		var ha = new HashArray(['key']);
 		var item1 = {
 				key: 'whatever'
@@ -363,20 +376,124 @@ describe('HashArray', function() {
 			};
 
 		ha.add(item1, item2, item3);
-		var ha2 = ha.clone();
+		ha.callback = function(type, what) {
+			it('Should have a "remove" callback.', function() {
+				assert.equal(type, 'remove');
+				assert.strictEqual(what[0], item1);
+				assert.strictEqual(what[1], item2);
+				assert.strictEqual(what[2], item3);
+			});
 
-		it('Should not strictly equal', function() {
-			assert.notStrictEqual(ha, ha2);
+			it('Should have 0 items after removeAll', function() {
+				assert.equal(ha.all.length, 0);
+			});
+
+			it('Should have a map with no keys.', function() {
+				for (var key in ha.map)
+					assert.equal(key, undefined);
+			});
+		};
+		ha.removeAll();
+	});
+
+	describe('add should not allow adding of duplicate objects (single key)', function() {
+		var ha = new HashArray('key');
+		var item1 = {
+				key: 'whatever'
+			},
+			item2 = {
+				key: 'whatever2'
+			},
+			item3 = {
+				key: 'whatever3'
+			};
+
+		ha.add(item1, item2, item3, item3);
+    
+		it('Length should be 3', function() {
+			assert(ha.all.length == 3, 'Length was not 3, was ' + ha.all.length)
 		});
+	});
+  
+	describe('add should not allow adding of duplicate objects (multi key)', function() {
+		var ha = new HashArray(['key1', 'key2']);
+		var item1 = {
+				key1: 'whatever2',
+        key2: 'whatever3'
+			},
+			item2 = {
+				key1: 'whatever2'
+			},
+			item3 = {
+				key1: 'whatever3'
+			};
 
-		it('Should deep equal', function() {
-			assert.deepEqual(ha, ha2);
+		ha.add(item1, item2, item3, item3);
+    
+		it('Length should be 3', function() {
+			assert(ha.all.length == 3, 'Length was not 3, was ' + ha.all.length)
 		});
+	});
+  
+	describe('union(ha) should work with simple single-key hasharrays', function() {
+		var ha1 = new HashArray('key');
+		var item1 = {
+				key: 'whatever'
+			},
+			item2 = {
+				key: 'whatever2'
+			},
+			item3 = {
+				key: 'whatever3'
+			},
+      item4 = {
+        key: 'whatever4'
+      };
 
-		it('Original should not affect new one', function() {
-			ha.removeAll();
-			assert.strictEqual(ha.all.length, 0);
-			assert.strictEqual(ha2.all.length, 3);
+		ha1.add(item1, item2, item3);
+
+		var ha2 = ha1.clone(null, true);
+    ha2.add(item1, item3, item4);
+
+    var union = ha1.union(ha2);
+    
+		it('Unioned hasharray should contain item1 and item3 only', function() {
+      assert(union.all.length == 2);
+			assert(union.collides(item1));
+      assert(!union.collides(item2));
+      assert(union.collides(item3));
+      assert(!union.collides(item4));
+		});
+	});
+  
+	describe('union(ha) should work with simple multi-key hasharrays', function() {
+		var ha1 = new HashArray(['key1', 'key2']);
+		var item1 = {
+				key1: 'whatever',
+        key2: 'whatever4'
+			},
+			item2 = {
+				key1: 'whatever2'
+			},
+			item3 = {
+				key1: 'whatever3'
+			},
+      item4 = {
+        key1: 'whatever4'
+      };
+
+		ha1.add(item1, item2, item3);
+
+		var ha2 = ha1.clone(null, true);
+    ha2.add(item1, item3, item4);
+
+    var union = ha1.union(ha2);
+    
+		it('Unioned hasharray should contain item1, item3, and item4 because of the extra key', function() {
+			assert(union.collides(item1), 'does not contain item1');
+      assert(!union.collides(item2), 'does contain item2');
+      assert(union.collides(item3), 'does not contain item3');
+      assert(union.collides(item4), 'does not contain item4');
 		});
 	});
 
