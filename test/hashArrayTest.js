@@ -85,6 +85,32 @@ describe('HashArray', function() {
       assert.equal(ha.collides({key2: 'whatever'}), true);
 		});
   });
+  
+  describe('add(items) should work with 2 item and duplicate keys and options.ignoreDuplicates = true', function() {
+    var ha = new HashArray(['key1', 'key2'], undefined, {ignoreDuplicates: true});
+    var item1 = {
+      key1: 'whatever1',
+      key2: 'whatever2'
+    };
+    var item2 = {
+      key1: 'whatever2',
+      key2: 'whatever1'
+    };
+
+    ha.add(item1, item2);
+
+    it('Should have a 1 item.', function() {
+      assert.equal(ha.all.length, 1);
+    });
+
+    it('Should map "whatever1" to item1 only (first inserted).', function() {
+      assert.equal(ha.getAsArray('whatever1').length, 1);
+    });
+    
+    it('Should map "whatever2" to item1 only (first inserted).', function() {
+      assert.equal(ha.getAsArray('whatever2').length, 1);
+    });
+  });
 
 	describe('add(items) should not allow addition of same item twice.', function() {
 		var ha = new HashArray(['key']);
@@ -435,7 +461,7 @@ describe('HashArray', function() {
 		});
 	});
   
-	describe('union(ha) should work with simple single-key hasharrays', function() {
+	describe('intersection(ha) should work with simple single-key hasharrays', function() {
 		var ha1 = new HashArray('key');
 		var item1 = {
 				key: 'whatever'
@@ -455,18 +481,18 @@ describe('HashArray', function() {
 		var ha2 = ha1.clone(null, true);
     ha2.add(item1, item3, item4);
 
-    var union = ha1.union(ha2);
+    var intersection = ha1.intersection(ha2);
     
 		it('Unioned hasharray should contain item1 and item3 only', function() {
-      assert(union.all.length == 2);
-			assert(union.collides(item1));
-      assert(!union.collides(item2));
-      assert(union.collides(item3));
-      assert(!union.collides(item4));
+      assert(intersection.all.length == 2);
+			assert(intersection.collides(item1));
+      assert(!intersection.collides(item2));
+      assert(intersection.collides(item3));
+      assert(!intersection.collides(item4));
 		});
 	});
   
-	describe('union(ha) should work with simple multi-key hasharrays', function() {
+	describe('intersection(ha) should work with simple multi-key hasharrays', function() {
 		var ha1 = new HashArray(['key1', 'key2']);
 		var item1 = {
 				key1: 'whatever',
@@ -487,13 +513,47 @@ describe('HashArray', function() {
 		var ha2 = ha1.clone(null, true);
     ha2.add(item1, item3, item4);
 
-    var union = ha1.union(ha2);
+    var intersection = ha1.intersection(ha2);
     
 		it('Unioned hasharray should contain item1, item3, and item4 because of the extra key', function() {
-			assert(union.collides(item1), 'does not contain item1');
-      assert(!union.collides(item2), 'does contain item2');
-      assert(union.collides(item3), 'does not contain item3');
-      assert(union.collides(item4), 'does not contain item4');
+			assert(intersection.collides(item1), 'does not contain item1');
+      assert(!intersection.collides(item2), 'does contain item2');
+      assert(intersection.collides(item3), 'does not contain item3');
+      assert(intersection.collides(item4), 'does not contain item4');
+		});
+	});
+  
+	describe('complement(ha) should work with simple multi-key hasharrays', function() {
+		var ha1 = new HashArray(['key1', 'key2']);
+		var item1 = {
+				key1: 'whatever',
+        key2: 'whatever4'
+			},
+			item2 = {
+				key1: 'whatever2'
+			},
+			item3 = {
+				key1: 'whatever3'
+			},
+      item4 = {
+        key1: 'whatever4'
+      };
+
+    // Contains keys ['whatever', 'whatever2', 'whatever3', 'whatever4']
+		ha1.add(item1, item2, item3, item4);
+
+		var ha2 = ha1.clone(null, true);
+    // Contains keys ['whatever', 'whatever3', 'whatever4']
+    ha2.add(item1, item3);
+
+    // SHOULD contain keys ['whatever2'] for item2 only.
+    var complement = ha1.complement(ha2);
+    
+		it('Complemented hasharray should contain item2 only', function() {
+			assert(!complement.collides(item1), 'does contain item1');
+      assert(complement.collides(item2), 'does not contain item2');
+      assert(!complement.collides(item3), 'does contain item3');
+      assert(!complement.collides(item4), 'does contain item4');
 		});
 	});
 

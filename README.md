@@ -3,9 +3,7 @@
 HashArray
 =========
 
-HashArray is a data structure that combines the best features of a hash and an array. Think of it as a super-lightweight, extensible, self-indexing database in memory.
-
-Among other things, it includes `add(...)`, `addAll(...)`, `remove(...)`, `forEach(...)` and `get(...)` operations that work for both simple keys like `'prop'` and deep keys like `['someChild', 'childProp']`.
+HashArray is a data structure that combines the best feature of a hash (O(1) retrieval) and an array (length and ordering). Think of it as a super-lightweight, extensible, self-indexing set database in memory.
 
 Install
 =======
@@ -15,8 +13,10 @@ Install
 Simplest Use Case
 =================
 
-    var HashArray = require('hasharray');
-    var ha = new HashArray('id');
+So as not to scare the faint of heart with all the technical goodness contained therein:
+
+    var HashArray = require('hasharray'),
+      ha = new HashArray('id');
 
     ha.add({id: 'someId0', name: 'Josh'},
            {id: 'someId1', name: 'Joseph'},
@@ -24,6 +24,89 @@ Simplest Use Case
            {id: 'someId3', name: 'Ty'});
 
     console.log(ha.get('someId0').name); // 'Kuba'
+
+API
+===
+
+Constructor
+-----------
+
+* `HashArray(keyfields, callback, options)`
+
+**`keyfields`**
+
+    var HashArray = require('HashArray');
+
+    new HashArray('firstname');   // one key, depth of 1 (e.g. `item.firstname`)
+    new HashArray(['firstname']); // same as above
+
+    // one key, depth of 2 (e.g. `item.first.name`)
+    new HashArray([['first', 'name']]); 
+
+    // two keys, depth of 1 (e.g. `item.firstname` AND `item.lastname`)
+    new HashArray(['firstname', 'lastname']);
+
+    // multiple keys, depth of 2 (e.g. `item.name.first` AND `item.name.last`)
+    new HashArray([['name', 'first'], ['name', 'last']]);
+
+Insertion
+---------
+
+* **`add(...items)`**: insert all arguments.
+* **`addAll(Array of items)`**: insert all items in the passed in Array.
+* **`addMap(key, item)`**: adds a single mapping from a key to a item.
+* **`addOne(item)`**: adds a single item, skipping dispatch of event.
+
+Retrieval
+---------
+
+* **`get(key)`**: if a single item exists for `key`, returns that item. If no item exists, returns `undefined`. If multiple items exist for the key, returns an `Array`.
+* **`getAll(keys)`**: unions all items for all provided keys and returns an Array. Ensures no duplicates even if `keys` independently return sets that intersect.
+* **`getAsArray(key)`**: like `get()` except if no item exists, returns an empty `Array`.
+* **`sample(count, keys)`**: samples all items in the HashArray, returning a random `Array` of size `count`. If `count` is larger than the `HashArray`, returns all items in the the `HashArray`
+
+Removal
+-------
+
+* **`remove(...items)`**: removes all items in arguments.
+* **`removeByKey(...keys)`**: removes all items that match the `keys` provided.
+* **`removeAll()`**: clears out all items in the `HashArray`
+
+Set
+---
+
+* **`intersection(HashArray)`**: returns a cloned `HashArray` whose items are the intersection between `this` and the passed in `HashArray` (`this` ^ `argument`).
+* **`complement(HashArray)`**: returns a cloned `HashArray` whose items are the complement between `this` and the passed in `HashArray` (`this` \ `argument`).
+
+Peeking
+-------
+
+* **`has(key)`**: returns `true` if any items exist for the provided key.
+* **`hasMultiple(key)`**: returns `true` if multiple items exist for the provided key (e.g. `get(key)` would return an `Array`)
+* **`collides(item)`**: returns `true` if the argument would collide with any other item in this `HashArray` for any key in the `HashArray`.
+
+Iteration
+---------
+
+* **`forEach(keys, callback)`**: iterates through a union of all items that match the provided keys argument and calls the callback passing in each item as an argument.
+* **`forEachDeep(keys, key, callback)`**: iterates through a union of all items that match the provided keys argument and passes the value (at the provided key argument) as an argument to the callback.
+
+Mathematical
+------------
+
+* **`sum(keys, key, weightKey)`**: sums all values for a union of all objects found for the `keys` argument provided at the `key` you provide. Weights the summation by `item[weightKey]` or by `1.0` if no `weightKey` is provided.
+* **`average(keys, key, weightKey)`**: similar to `sum()` except returns the average.
+
+Filtering
+---------
+
+* **`filter(keys, callbackOrKey)`**: returns a new `HashArray` that is a clone of the current one but filtered by the provided `keys`.
+
+Utility
+-------
+
+* **`objectAt(item, key)`**: internally used to find a value on `item` at `key`. For example, `objectAt(obj, 'firstname')` would return `obj['firstname']`. `objectAt(obj, ['first', 'name'])` would return `obj['first']['name']`. Returns undefined if the key does not map properly to the provided object.
+* **`clone(callback, ignoreItems)`**: shallow clones the `HashArray`. If `ignoreItems` is true, does not clone the items just the settings.
 
 Purpose
 =======
@@ -68,8 +151,8 @@ At this time, I am also working on adding functions for statistical analysis, li
 Examples
 ========
 
-Basic Usage
------------
+Basic Examples
+--------------
 
     var HashArray = require ('hasharray');
 
@@ -246,10 +329,10 @@ You can easily extend HashArray:
 
     var MyCustomHashArray = HashArray._extend({
       ...
-      init: function (keyFields) 
+      init: function init(keyFields) 
       {
         console.log('My custom hash array!');
-        this._super(keyFields);
+        init._super(keyFields);
       }
       ...
     });
@@ -267,7 +350,7 @@ Testing
 
       ․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․․
 
-      61 passing (25ms)
+      76 passing (25ms)
 
 License
 =======

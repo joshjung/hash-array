@@ -1,7 +1,16 @@
+/*===========================================================================*\
+ * Requires
+\*===========================================================================*/
 var JClass = require('jclass');
 
+/*===========================================================================*\
+ * HashArray
+\*===========================================================================*/
 var HashArray = JClass._extend({
-	init: function(keyFields, callback) {
+  //-----------------------------------
+  // Constructor
+  //-----------------------------------
+	init: function(keyFields, callback, options) {
     keyFields = keyFields instanceof Array ? keyFields : [keyFields];
 
 		this._map = {};
@@ -12,32 +21,45 @@ var HashArray = JClass._extend({
 
     this.isHashArray = true;
     
+    this.options = options || {
+      ignoreDuplicates: false
+    };
+
 		if (callback) {
 			callback('construct');
 		}
 	},
+  //-----------------------------------
+  // add()
+  //-----------------------------------
+  addOne: function (obj) {
+    var needsDupCheck = false;
+		for (var key in this.keyFields) {
+			key = this.keyFields[key];
+			var inst = this.objectAt(obj, key);
+			if (inst) {
+				if (this._map[inst]) {
+          if (this.options.ignoreDuplicates)
+            return;
+					if (this._map[inst].indexOf(obj) != -1) {
+						// Cannot add the same item twice
+            needsDupCheck = true;
+						continue;
+					}
+					this._map[inst].push(obj);
+				}
+        else this._map[inst] = [obj];
+			}
+		}
+
+    if (!needsDupCheck || this._list.indexOf(obj) == -1)
+		  this._list.push(obj);
+  },
 	add: function() {
 		for (var i = 0; i < arguments.length; i++) {
-			var obj = arguments[i],
-        needsDupCheck = false;
-			for (var key in this.keyFields) {
-				key = this.keyFields[key];
-				var inst = this.find(obj, key);
-				if (inst) {
-					if (this._map[inst]) {
-						if (this._map[inst].indexOf(obj) != -1) {
-							// Cannot add the same item twice
-              needsDupCheck = true;
-							continue;
-						}
-						this._map[inst].push(obj);
-					} else this._map[inst] = [obj];
-				}
-			}
-
-      if (!needsDupCheck || this._list.indexOf(obj) == -1)
-			  this._list.push(obj);
+			this.addOne(arguments[i]);
 		}
+
 		if (this.callback) {
 			this.callback('add', Array.prototype.slice.call(arguments, 0));
 		}
@@ -65,14 +87,17 @@ var HashArray = JClass._extend({
     
     return this;
 	},
+  //-----------------------------------
+  // Intersection, union, etc.
+  //-----------------------------------
   /**
-   * Returns a new HashArray that contains the intersection between this hash array and the hasharray passed in.
+   * Returns a new HashArray that contains the intersection between this (A) and the hasharray passed in (B). Returns A ^ B.
    */
-  union: function (other) {
+  intersection: function (other) {
     var self = this;
 
     if (!other || !other.isHashArray)
-      throw Error('Cannot HashArray.union() on a non-hasharray object. You passed in: ', other);
+      throw Error('Cannot HashArray.intersection() on a non-hasharray object. You passed in: ', other);
 
     var ret = this.clone(null, true),
       allItems = this.clone(null, true).addAll(this.all.concat(other.all));
@@ -84,6 +109,27 @@ var HashArray = JClass._extend({
 
     return ret;
   },
+  /**
+   * Returns a new HashArray that contains the complement (difference) between this hash array (A) and the hasharray passed in (B). Returns A - B.
+   */
+  complement: function (other) {
+    var self = this;
+
+    if (!other || !other.isHashArray)
+      throw Error('Cannot HashArray.complement() on a non-hasharray object. You passed in: ', other);
+
+    var ret = this.clone(null, true);
+
+    this.all.forEach(function (item) {
+      if (!other.collides(item))
+        ret.add(item);
+    });
+
+    return ret;
+  },
+  //-----------------------------------
+  // Retrieval
+  //-----------------------------------
 	get: function(key) {
 		return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
 	},
@@ -133,12 +179,15 @@ var HashArray = JClass._extend({
 
     return res;
   },
+  //-----------------------------------
+  // Peeking
+  //-----------------------------------
 	has: function(key) {
 		return this._map.hasOwnProperty(key);
 	},
   collides: function (item) {
     for (var k in this.keyFields)
-      if (this.has(this.find(item, this.keyFields[k])))
+      if (this.has(this.objectAt(item, this.keyFields[k])))
         return true;
     
     return false;
@@ -146,6 +195,9 @@ var HashArray = JClass._extend({
 	hasMultiple: function(key) {
 		return this._map[key] instanceof Array;
 	},
+  //-----------------------------------
+  // Removal
+  //-----------------------------------
 	removeByKey: function() {
 		var removed = [];
 		for (var i = 0; i < arguments.length; i++) {
@@ -156,7 +208,7 @@ var HashArray = JClass._extend({
 				for (var j in items) {
 					var item = items[j];
 					for (var ix in this.keyFields) {
-						var key2 = this.find(item, this.keyFields[ix]);
+						var key2 = this.objectAt(item, this.keyFields[ix]);
 						if (key2 && this._map[key2]) {
 							var ix = this._map[key2].indexOf(item);
 							if (ix != -1) {
@@ -184,7 +236,7 @@ var HashArray = JClass._extend({
 		for (var i = 0; i < arguments.length; i++) {
 			var item = arguments[i];
 			for (var ix in this.keyFields) {
-				var key = this.find(item, this.keyFields[ix]);
+				var key = this.objectAt(item, this.keyFields[ix]);
 				if (key) {
 					var ix = this._map[key].indexOf(item);
 					if (ix != -1)
@@ -215,7 +267,10 @@ var HashArray = JClass._extend({
     
     return this;
 	},
-	find: function(obj, path) {
+  //-----------------------------------
+  // Utility
+  //-----------------------------------
+	objectAt: function(obj, path) {
 		if (typeof path === 'string') {
 			return obj[path];
 		}
@@ -228,6 +283,9 @@ var HashArray = JClass._extend({
 
 		return obj;
 	},
+  //-----------------------------------
+  // Iteration
+  //-----------------------------------
   forEach: function(keys, callback) {
     keys = keys instanceof Array ? keys : [keys];
 
@@ -244,23 +302,29 @@ var HashArray = JClass._extend({
       objs = this.getAll(keys);
 
     objs.forEach(function (item) {
-      callback(self.find(item, key), item);
+      callback(self.objectAt(item, key), item);
     });
     
     return this;
   },
+  //-----------------------------------
+  // Cloning
+  //-----------------------------------
 	clone: function(callback, ignoreItems) {
 		var n = new HashArray(this.keyFields.concat(), callback ? callback : this.callback);
     if (!ignoreItems)
       n.add.apply(n, this.all.concat());
 		return n;
 	},
+  //-----------------------------------
+  // Mathematical
+  //-----------------------------------
   sum: function(keys, key, weightKey) {
     var self = this,
       ret = 0;
     this.forEachDeep(keys, key, function (value, item) {
       if (weightKey !== undefined)
-        value *= self.find(item, weightKey);
+        value *= self.objectAt(item, weightKey);
 
       ret += value;
     });
@@ -279,7 +343,7 @@ var HashArray = JClass._extend({
 
     this.forEachDeep(keys, key, function (value, item) {
       if (weightKey !== undefined)
-        value *= (self.find(item, weightKey) / weightsTotal);
+        value *= (self.objectAt(item, weightKey) / weightsTotal);
 
       ret += value;
       tot++;
@@ -287,6 +351,9 @@ var HashArray = JClass._extend({
 
     return weightKey !== undefined ? ret : ret / tot;
   },
+  //-----------------------------------
+  // Filtering
+  //-----------------------------------
   filter: function (keys, callbackOrKey) {
     var self = this;
     
@@ -297,12 +364,15 @@ var HashArray = JClass._extend({
     return ha;
     
     function defaultCallback(item) {
-      var val = self.find(item, callbackOrKey);
+      var val = self.objectAt(item, callbackOrKey);
       return val !== undefined && val !== false;
     }
   }
 });
 
+//-----------------------------------
+// Operators
+//-----------------------------------
 Object.defineProperty(HashArray.prototype, 'all', {
 	get: function () {
 		return this._list;
@@ -317,5 +387,8 @@ Object.defineProperty(HashArray.prototype, 'map', {
 
 module.exports = HashArray;
 
+//-----------------------------------
+// Browser
+//-----------------------------------
 if (typeof window !== 'undefined')
 	window.HashArray = HashArray;
