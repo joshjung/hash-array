@@ -49,6 +49,23 @@ Constructor
     // multiple keys, depth of 2 (e.g. `item.name.first` AND `item.name.last`)
     new HashArray([['name', 'first'], ['name', 'last']]);
 
+**`callback`**
+
+A callback function can be specified to monitor changes to the HashArray as they occur:
+
+    var ha = new HashArray('someKey', function(type, whatChanged) {
+      // type will be 'add', 'addMap', 'remove', 'removeByKey', or 'construct'
+      // whatChanged will be the items that were changed
+    });
+
+**`options`**
+
+    {
+      ignoreDuplicates: false; // When true, any attempt to add items that collide
+                               // with any items in the HashArray will be ignored.
+                               // default is false.
+    }
+
 Insertion
 ---------
 

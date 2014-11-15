@@ -10,14 +10,14 @@ var HashArray = JClass._extend({
   //-----------------------------------
   // Constructor
   //-----------------------------------
-	init: function(keyFields, callback, options) {
+  init: function(keyFields, callback, options) {
     keyFields = keyFields instanceof Array ? keyFields : [keyFields];
 
-		this._map = {};
-		this._list = [];
-		this.callback = callback;
+    this._map = {};
+    this._list = [];
+    this.callback = callback;
 
-		this.keyFields = keyFields;
+    this.keyFields = keyFields;
 
     this.isHashArray = true;
     
@@ -25,47 +25,47 @@ var HashArray = JClass._extend({
       ignoreDuplicates: false
     };
 
-		if (callback) {
-			callback('construct');
-		}
-	},
+    if (callback) {
+      callback('construct');
+    }
+  },
   //-----------------------------------
   // add()
   //-----------------------------------
   addOne: function (obj) {
     var needsDupCheck = false;
-		for (var key in this.keyFields) {
-			key = this.keyFields[key];
-			var inst = this.objectAt(obj, key);
-			if (inst) {
-				if (this._map[inst]) {
+    for (var key in this.keyFields) {
+      key = this.keyFields[key];
+      var inst = this.objectAt(obj, key);
+      if (inst) {
+        if (this._map[inst]) {
           if (this.options.ignoreDuplicates)
             return;
-					if (this._map[inst].indexOf(obj) != -1) {
-						// Cannot add the same item twice
+          if (this._map[inst].indexOf(obj) != -1) {
+            // Cannot add the same item twice
             needsDupCheck = true;
-						continue;
-					}
-					this._map[inst].push(obj);
-				}
+            continue;
+          }
+          this._map[inst].push(obj);
+        }
         else this._map[inst] = [obj];
-			}
-		}
+      }
+    }
 
     if (!needsDupCheck || this._list.indexOf(obj) == -1)
-		  this._list.push(obj);
+      this._list.push(obj);
   },
-	add: function() {
-		for (var i = 0; i < arguments.length; i++) {
-			this.addOne(arguments[i]);
-		}
+  add: function() {
+    for (var i = 0; i < arguments.length; i++) {
+      this.addOne(arguments[i]);
+    }
 
-		if (this.callback) {
-			this.callback('add', Array.prototype.slice.call(arguments, 0));
-		}
+    if (this.callback) {
+      this.callback('add', Array.prototype.slice.call(arguments, 0));
+    }
     
     return this;
-	},
+  },
   addAll: function (arr) {
     if (arr.length < 100)
       this.add.apply(this, arr);
@@ -76,17 +76,17 @@ var HashArray = JClass._extend({
     
     return this;
   },
-	addMap: function(key, obj) {
-		this._map[key] = obj;
-		if (this.callback) {
-			this.callback('addMap', {
-				key: key,
-				obj: obj
-			});
-		}
+  addMap: function(key, obj) {
+    this._map[key] = obj;
+    if (this.callback) {
+      this.callback('addMap', {
+        key: key,
+        obj: obj
+      });
+    }
     
     return this;
-	},
+  },
   //-----------------------------------
   // Intersection, union, etc.
   //-----------------------------------
@@ -130,9 +130,9 @@ var HashArray = JClass._extend({
   //-----------------------------------
   // Retrieval
   //-----------------------------------
-	get: function(key) {
-		return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
-	},
+  get: function(key) {
+    return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
+  },
   getAll: function(keys) {
     keys = keys instanceof Array ? keys : [keys];
 
@@ -182,9 +182,9 @@ var HashArray = JClass._extend({
   //-----------------------------------
   // Peeking
   //-----------------------------------
-	has: function(key) {
-		return this._map.hasOwnProperty(key);
-	},
+  has: function(key) {
+    return this._map.hasOwnProperty(key);
+  },
   collides: function (item) {
     for (var k in this.keyFields)
       if (this.has(this.objectAt(item, this.keyFields[k])))
@@ -192,97 +192,97 @@ var HashArray = JClass._extend({
     
     return false;
   },
-	hasMultiple: function(key) {
-		return this._map[key] instanceof Array;
-	},
+  hasMultiple: function(key) {
+    return this._map[key] instanceof Array;
+  },
   //-----------------------------------
   // Removal
   //-----------------------------------
-	removeByKey: function() {
-		var removed = [];
-		for (var i = 0; i < arguments.length; i++) {
-			var key = arguments[i];
-			var items = this._map[key].concat();
-			if (items) {
-				removed = removed.concat(items);
-				for (var j in items) {
-					var item = items[j];
-					for (var ix in this.keyFields) {
-						var key2 = this.objectAt(item, this.keyFields[ix]);
-						if (key2 && this._map[key2]) {
-							var ix = this._map[key2].indexOf(item);
-							if (ix != -1) {
-								this._map[key2].splice(ix, 1);
-							}
+  removeByKey: function() {
+    var removed = [];
+    for (var i = 0; i < arguments.length; i++) {
+      var key = arguments[i];
+      var items = this._map[key].concat();
+      if (items) {
+        removed = removed.concat(items);
+        for (var j in items) {
+          var item = items[j];
+          for (var ix in this.keyFields) {
+            var key2 = this.objectAt(item, this.keyFields[ix]);
+            if (key2 && this._map[key2]) {
+              var ix = this._map[key2].indexOf(item);
+              if (ix != -1) {
+                this._map[key2].splice(ix, 1);
+              }
 
-							if (this._map[key2].length == 0)
-								delete this._map[key2];
-						}
-					}
+              if (this._map[key2].length == 0)
+                delete this._map[key2];
+            }
+          }
 
-					this._list.splice(this._list.indexOf(item), 1);
-				}
-			}
-			delete this._map[key];
-		}
+          this._list.splice(this._list.indexOf(item), 1);
+        }
+      }
+      delete this._map[key];
+    }
 
-		if (this.callback) {
-			this.callback('removeByKey', removed);
-		}
+    if (this.callback) {
+      this.callback('removeByKey', removed);
+    }
     
     return this;
-	},
-	remove: function() {
-		for (var i = 0; i < arguments.length; i++) {
-			var item = arguments[i];
-			for (var ix in this.keyFields) {
-				var key = this.objectAt(item, this.keyFields[ix]);
-				if (key) {
-					var ix = this._map[key].indexOf(item);
-					if (ix != -1)
-						this._map[key].splice(ix, 1);
+  },
+  remove: function() {
+    for (var i = 0; i < arguments.length; i++) {
+      var item = arguments[i];
+      for (var ix in this.keyFields) {
+        var key = this.objectAt(item, this.keyFields[ix]);
+        if (key) {
+          var ix = this._map[key].indexOf(item);
+          if (ix != -1)
+            this._map[key].splice(ix, 1);
 
-					if (this._map[key].length == 0)
-						delete this._map[key];
-				}
-			}
+          if (this._map[key].length == 0)
+            delete this._map[key];
+        }
+      }
 
-			this._list.splice(this._list.indexOf(item), 1);
-		}
+      this._list.splice(this._list.indexOf(item), 1);
+    }
 
-		if (this.callback) {
-			this.callback('remove', arguments);
-		}
+    if (this.callback) {
+      this.callback('remove', arguments);
+    }
     
     return this;
-	},
-	removeAll: function() {
-		var old = this._list.concat();
-		this._map = {};
-		this._list = [];
+  },
+  removeAll: function() {
+    var old = this._list.concat();
+    this._map = {};
+    this._list = [];
 
-		if (this.callback) {
-			this.callback('remove', old);
-		}
+    if (this.callback) {
+      this.callback('remove', old);
+    }
     
     return this;
-	},
+  },
   //-----------------------------------
   // Utility
   //-----------------------------------
-	objectAt: function(obj, path) {
-		if (typeof path === 'string') {
-			return obj[path];
-		}
+  objectAt: function(obj, path) {
+    if (typeof path === 'string') {
+      return obj[path];
+    }
 
-		var dup = path.concat();
-		// else assume array.
-		while (dup.length && obj) {
-			obj = obj[dup.shift()];
-		}
+    var dup = path.concat();
+    // else assume array.
+    while (dup.length && obj) {
+      obj = obj[dup.shift()];
+    }
 
-		return obj;
-	},
+    return obj;
+  },
   //-----------------------------------
   // Iteration
   //-----------------------------------
@@ -310,12 +310,12 @@ var HashArray = JClass._extend({
   //-----------------------------------
   // Cloning
   //-----------------------------------
-	clone: function(callback, ignoreItems) {
-		var n = new HashArray(this.keyFields.concat(), callback ? callback : this.callback);
+  clone: function(callback, ignoreItems) {
+    var n = new HashArray(this.keyFields.concat(), callback ? callback : this.callback);
     if (!ignoreItems)
       n.add.apply(n, this.all.concat());
-		return n;
-	},
+    return n;
+  },
   //-----------------------------------
   // Mathematical
   //-----------------------------------
@@ -374,15 +374,15 @@ var HashArray = JClass._extend({
 // Operators
 //-----------------------------------
 Object.defineProperty(HashArray.prototype, 'all', {
-	get: function () {
-		return this._list;
-	}
+  get: function () {
+    return this._list;
+  }
 });
 
 Object.defineProperty(HashArray.prototype, 'map', {
-	get: function () {
-		return this._map;
-	}
+  get: function () {
+    return this._map;
+  }
 });
 
 module.exports = HashArray;
@@ -391,4 +391,4 @@ module.exports = HashArray;
 // Browser
 //-----------------------------------
 if (typeof window !== 'undefined')
-	window.HashArray = HashArray;
+  window.HashArray = HashArray;
