@@ -3,12 +3,12 @@
   "author": "Joshua Jung <joshua.p.jung@gmail.com>",
   "license": "MIT",
   "description": "A data structure that combines a hash and an array for fast dictionary lookup and traversal by complex keys.",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "main": "index.js",
   "url": "https://github.com/joshjung/hash-array",
   "homepage": "https://github.com/joshjung/hash-array",
   "email": "joshua.p.jung@gmail.com",
-  "files": ["dist"],
+  "files": ["dist", "src", "index.js", "test"],
   "dependencies": {
     "debug": "^1.0.4",
     "jclass": "^1.0.1"
