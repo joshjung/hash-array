@@ -241,13 +241,20 @@ var HashArray = JClass._extend({
           var ix = this._map[key].indexOf(item);
           if (ix != -1)
             this._map[key].splice(ix, 1);
+          else
+            throw new Error('HashArray: attempting to remove an object that was never added!' + key);
 
           if (this._map[key].length == 0)
             delete this._map[key];
         }
       }
 
-      this._list.splice(this._list.indexOf(item), 1);
+      var ix = this._list.indexOf(item);
+
+      if (ix != -1)
+        this._list.splice(ix, 1);
+      else
+        throw new Error('HashArray: attempting to remove an object that was never added!' + key);
     }
 
     if (this.callback) {

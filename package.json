@@ -9,6 +9,11 @@
   "homepage": "https://github.com/joshjung/hash-array",
   "email": "joshua.p.jung@gmail.com",
   "files": ["dist", "src", "index.js", "test"],
+  "scripts": {
+    "release:major": "npm version major && npm publish && git push --follow-tags",
+    "release:minor": "npm version minor && npm publish && git push --follow-tags",
+    "release:patch": "npm version patch && npm publish && git push --follow-tags"
+  },
   "dependencies": {
     "jclass": "^1.0.1"
   },
