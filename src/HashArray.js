@@ -38,7 +38,7 @@ var HashArray = JClass._extend({
       key = this.keyFields[key];
       var inst = this.objectAt(obj, key);
       if (inst) {
-        if (this._map[inst]) {
+        if (this.has(inst)) {
           if (this.options.ignoreDuplicates)
             return;
           if (this._map[inst].indexOf(obj) != -1) {
@@ -209,7 +209,7 @@ var HashArray = JClass._extend({
           var item = items[j];
           for (var ix in this.keyFields) {
             var key2 = this.objectAt(item, this.keyFields[ix]);
-            if (key2 && this._map[key2]) {
+            if (key2 && this.has(key2)) {
               var ix = this._map[key2].indexOf(item);
               if (ix != -1) {
                 this._map[key2].splice(ix, 1);
