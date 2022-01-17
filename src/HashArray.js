@@ -131,6 +131,8 @@ var HashArray = JClass._extend({
   // Retrieval
   //-----------------------------------
   get: function(key) {
+    if (!this.has(key))
+      return;
     return (!(this._map[key] instanceof Array) || this._map[key].length != 1) ? this._map[key] : this._map[key][0];
   },
   getAll: function(keys) {

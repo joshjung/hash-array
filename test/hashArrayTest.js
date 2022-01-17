@@ -48,6 +48,10 @@ describe('HashArray', function() {
 		it('Should map "whatever" to that item.', function() {
 			assert.equal(ha.get('whatever'), item);
 		});
+
+		it('Should not crash on the reserved keyword "constructor".', function() {
+			assert.equal(ha.get('constructo'), undefined);
+		});
     
 		it('Should return true to a collides for a similar object.', function() {
 			assert.equal(ha.collides({key: 'whatever'}), true);
